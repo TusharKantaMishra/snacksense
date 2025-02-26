@@ -1,0 +1,298 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* 🌌 AI-Themed Background (Universal) */
+/* 🌌 Animated Background with Glowing Particles */
+body {
+  background: radial-gradient(circle, rgba(10, 10, 10, 1) 0%, rgba(2, 2, 2, 1) 100%);
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
+  scroll-behavior: smooth;
+}
+
+/* 🌟 3D Moving Gradient Overlay */
+.animated-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #533483);
+  background-size: 400% 400%;
+  animation: gradientMove 10s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ✨ Floating Glowing Particles */
+.particle-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-color: rgba(0, 255, 255, 0.7);
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.9);
+  opacity: 0.7;
+  animation: floatParticles linear infinite;
+}
+
+@keyframes floatParticles {
+  0% { transform: translateY(10px) scale(1); opacity: 0.8; }
+  50% { transform: translateY(20px) scale(1.7); opacity: 0.4; }
+  100% { transform: translateY(10px) scale(1); opacity: 0.8; }
+}
+
+/* Dynamically Generated Particles */
+.particle:nth-child(1) { top: 10%; left: 20%; animation-duration: 8s; }
+.particle:nth-child(2) { top: 40%; left: 60%; animation-duration: 6s; }
+.particle:nth-child(3) { top: 70%; left: 30%; animation-duration: 8s; }
+.particle:nth-child(4) { top: 20%; left: 80%; animation-duration: 7s; }
+.particle:nth-child(5) { top: 60%; left: 50%; animation-duration: 9s; }
+
+/* 🌀 Cursor Glow Effect */
+.cursor-glow {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  background-color: rgba(0, 255, 255, 0.7);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.9));
+  transition: transform 0.05s ease-out;
+}
+
+
+/* 🌠 Parallax Background Effect */
+.parallax-background {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle, rgba(10, 10, 10, 1) 0%, rgba(2, 2, 2, 1) 100%);
+  z-index: -1;
+  transition: transform 0.1s ease-out;
+}
+
+/* 🌀 Floating Animated Logos */
+.logo-container {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  opacity: 0.3;
+  animation: floatAnimation 10s infinite ease-in-out alternate;
+  filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.7));
+}
+
+/* 🔄 Different Floating Logo Speeds & Positions */
+.logo-container:nth-child(1) { left: 5%; top: 10%; animation-duration: 13s; }
+.logo-container:nth-child(2) { left: 70%; top: 40%; animation-duration: 9s; }
+.logo-container:nth-child(3) { left: 30%; top: 70%; animation-duration: 15s; }
+.logo-container:nth-child(4) { left: 85%; top: 20%; animation-duration: 8s; }
+.logo-container:nth-child(5) { left: 50%; top: 90%; animation-duration: 11s; }
+
+/* 🌀 Floating Animation */
+@keyframes floatAnimation {
+  0% {
+    transform: translateY(0px) scale(1);
+  }
+  100% {
+    transform: translateY(-30px) scale(1.2);
+  }
+}
+
+/* 🔥 AI Cursor Glow Effect */
+.cursor-glow {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  background-color: rgba(0, 255, 255, 0.7);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.9));
+  transition: transform 0.05s ease-out;
+}
+
+/* 🚀 Moving Background Elements */
+.moving-elements {
+  position: absolute;
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+}
+
+/* 🔢 Matrix-Style Binary Code Effect */
+.matrix-code {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  opacity: 0.1;
+  overflow: hidden;
+  font-family: monospace;
+  color: rgba(0, 255, 0, 0.7);
+  font-size: 18px;
+  animation: matrixRain 5s infinite linear;
+}
+
+/* 🖥 Falling Code Effect */
+@keyframes matrixRain {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* 🌊 Background Wave Animation */
+.waves {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 120px;
+  background: url('/images/wave.svg');
+  animation: waveAnimation 8s infinite linear;
+  opacity: 0.5;
+}
+
+/* 🌊 Wave Motion */
+@keyframes waveAnimation {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* ✨ AI Pulsating Text Animation */
+.ai-text {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: rgba(0, 255, 255, 0.9);
+  animation: pulseAnimation 3s infinite ease-in-out;
+}
+
+/* 🏆 Pulsing Effect for AI Text */
+@keyframes pulseAnimation {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* 🚀 AI Hover Glow Effect */
+.ai-hover:hover {
+  transition: 0.3s;
+  box-shadow: 0px 0px 20px rgba(0, 255, 255, 0.8);
+  transform: scale(1.1);
+}
+
+/* 🎨 Navbar Styles */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* 🌀 Navbar Logo */
+.navbar-logo {
+  height: 50px;
+  margin-right: 10px;
+}
+
+/* 🔠 Navbar Text (Animated) */
+.navbar-text {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: white;
+  transition: 0.3s ease-in-out;
+}
+
+/* 🏆 Navbar Hover Effect */
+.navbar-text:hover {
+  color: rgba(0, 255, 255, 0.8);
+  transform: scale(1.1);
+}
+/* 🔵 Parallax Background */
+.parallax-background {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle, rgba(10, 10, 10, 1) 0%, rgba(2, 2, 2, 1) 100%);
+  z-index: -1;
+  transition: transform 0.1s ease-out;
+}
+
+/* 🌀 Cursor Glow Effect */
+.cursor-glow {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  background-color: rgba(0, 255, 255, 0.7);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.9));
+  transition: transform 0.05s ease-out;
+}
+
+/* 🌟 Page Content Styling */
+.page-container {
+  position: relative;
+  z-index: 1;
+  padding: 20px;
+}
+
+
+/* 📱 Mobile Responsive Design */
+@media screen and (max-width: 768px) {
+  /* 🌌 Optimize Background */
+  .parallax-background {
+    background: black;
+  }
+
+  /* 🔢 Reduce Matrix Code Size */
+  .matrix-code {
+    font-size: 12px;
+    opacity: 0.05;
+  }
+
+  /* 📏 Scale Down Logos */
+  .logo-container {
+    width: 80px;
+    height: 80px;
+  }
+
+  /* 🎨 Navbar Adjustments */
+  .navbar {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .navbar-text {
+    font-size: 1.5rem;
+  }
+
+  /* 🌀 Reduce Cursor Glow */
+  .cursor-glow {
+    width: 10px;
+    height: 10px;
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.7));
+  }
+}
+
+

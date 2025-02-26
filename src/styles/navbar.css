@@ -1,0 +1,196 @@
+/* 🌟 Navbar Container */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 70px;
+  background: rgba(15, 15, 15, 0.85);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  z-index: 1000;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease-in-out;
+}
+
+/* 🔥 Navbar Hover Animation */
+.navbar:hover {
+  background: rgba(10, 10, 10, 0.95);
+}
+
+/* 🟡 Brand (Logo & Name in One Line) */
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  text-decoration: none;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* 🔵 Circular Logo */
+.site-logo {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+/* 🎆 Logo Hover Effect */
+.site-logo:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+}
+
+/* ✨ Site Name with Gradient */
+.site-name {
+  font-size: 1.6rem;
+  font-weight: bold;
+  font-family: var(--font-montserrat), sans-serif;
+  background: linear-gradient(90deg, #42a5f5, #ff4081);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+  margin-left: 5px;
+}
+
+/* 🚀 Name Hover Glow */
+.site-name:hover {
+  transform: scale(1.05);
+  text-shadow: 0px 0px 20px rgba(66, 165, 245, 0.8);
+}
+
+/* 📜 Nav Links */
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 35px;
+}
+
+.nav-links li {
+  position: relative;
+}
+
+/* 🎭 Link Styling */
+.nav-links a {
+  text-decoration: none;
+  font-size: 1.3rem;
+  font-weight: bold;
+  font-family: "Space Grotesk", serif;
+  color: #42a5f5;
+  transition: color 0.3s ease-in-out;
+}
+
+/* 🟢 Hover Effects */
+.nav-links a:hover {
+  color: #ff4081;
+  text-shadow: 0 0 10px rgba(255, 64, 129, 0.7);
+}
+
+/* 📜 Underline Animation */
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #42a5f5, #ff4081);
+  left: 0;
+  bottom: -5px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease-in-out;
+}
+
+.nav-links a:hover::after {
+  transform: scaleX(1);
+}
+
+/* 📱 Mobile Menu Button */
+.menu-icon {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.bar {
+  width: 30px;
+  height: 4px;
+  background: #42a5f5;
+  margin: 5px 0;
+  transition: all 0.3s ease-in-out;
+}
+
+/* 🔥 Animated Mobile Menu */
+.mobile-menu {
+  position: absolute;
+  top: 70px;
+  left: 0;
+  width: 100%;
+  background: rgba(15, 15, 15, 0.95);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  text-align: center;
+  list-style: none;
+  padding: 20px 0;
+  display: none;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease-in-out;
+}
+
+.mobile-menu.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 📜 Mobile Menu Items */
+.mobile-menu li {
+  margin: 15px 0;
+}
+
+.mobile-menu a {
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #42a5f5;
+  transition: color 0.3s ease-in-out;
+}
+
+.mobile-menu a:hover {
+  color: #ff4081;
+  text-shadow: 0 0 10px rgba(255, 64, 129, 0.7);
+}
+
+/* 🔥 Menu Button Animation */
+.menu-icon.active .bar:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+.menu-icon.active .bar:nth-child(2) {
+  opacity: 0;
+}
+.menu-icon.active .bar:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* 🔥 Responsive Design */
+@media (max-width: 768px) {
+  .nav-links {
+      display: none;
+  }
+
+  .menu-icon {
+      display: flex;
+  }
+}
