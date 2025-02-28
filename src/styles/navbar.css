@@ -76,6 +76,9 @@
   list-style: none;
   display: flex;
   gap: 35px;
+  justify-content: center; /* Center the links horizontally */
+  align-items: center; /* Center the links vertically */
+  flex: 1; /* Allow the links to take up available space */
 }
 
 .nav-links li {
@@ -182,6 +185,20 @@
 }
 .menu-icon.active .bar:nth-child(3) {
   transform: rotate(-45deg) translate(6px, -6px);
+}
+.logout-link {
+  display: flex;
+  align-items: center;
+  color: #ff0000; /* Change the color to red */
+  font-weight: bold; /* Make the text bold */
+  padding: 10px 15px; /* Add some padding */
+  border-radius: 5px; /* Add rounded corners */
+  transition: background-color 0.3s ease; /* Add a transition effect */
+}
+
+.logout-link:hover {
+  background-color: #ffe6e6; /* Change background color on hover */
+  color: #cc0000; /* Change text color on hover */
 }
 
 /* 🔥 Responsive Design */

@@ -1,0 +1,140 @@
+/* Sign In Page Styling */
+.signin-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #1d1532;
+}
+
+@media (min-width: 768px) {
+  .signin-container {
+    flex-direction: row;
+  }
+}
+
+.signin-left {
+  width: 100%;
+  background-color: #2d2144;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: white;
+  text-align: center;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.signin-left .title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #a3e0e6;
+}
+
+.signin-left .subtitle {
+  font-size: 1rem;
+  color: rgba(163, 224, 230, 0.8);
+}
+
+.signin-left .cpu-icon {
+  color: #00f0ff;
+  width: 3rem;
+  height: 3rem;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+.signin-right {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.signin-form-container {
+  background-color: rgba(42, 31, 61, 0.8);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.signin-form-container .form-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #a3e0e6;
+  margin-bottom: 1.5rem;
+}
+
+.error-text {
+  color: red;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.input-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: gray;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px 12px 10px 35px;
+  border-radius: 6px;
+  border: 1px solid #3d2d5c;
+  background-color: rgba(29, 21, 50, 0.8);
+  color: white;
+  font-size: 0.9rem;
+}
+
+.input-group input:focus {
+  border-color: #a3e0e6;
+  outline: none;
+}
+
+.signin-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #ff5cb3;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.signin-button:hover {
+  background-color: #d64a94;
+}
+
+.redirect-text {
+  margin-top: 1rem;
+}
+
+.register-link {
+  font-size: 0.9rem;
+  color: #a3e0e6;
+  text-decoration: none;
+}
+
+.register-link:hover {
+  color: #00f0ff;
+}

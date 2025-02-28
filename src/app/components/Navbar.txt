@@ -1,0 +1,126 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { useState, useEffect } from "react";
+import { User } from "lucide-react"; // Import User icon
+import "../../styles/navbar.css";
+import { auth } from "../firebase/config"; // Adjust path based on your structure
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+
+// Define the User type
+interface UserData {
+  uid: string;
+  name?: string; // Optional if not always present
+  email?: string; // Optional if not always present
+}
+
+export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<UserData | null>(null); // Use the defined interface
+  const [profileOpen, setProfileOpen] = useState(false); // Control profile card visibility
+  const db = getFirestore();
+
+  useEffect(() => {
+    // Listen for auth state changes
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        // Fetch user data from Firestore
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        if (userDoc.exists()) {
+          setUser({ uid: currentUser.uid, ...userDoc.data() as UserData });
+        } else {
+          setUser({ uid: currentUser.uid, name: "User", email: currentUser.email }); // Default if no Firestore data
+        }
+      } else {
+        setUser(null);
+      }
+    });
+
+    // Cleanup subscription
+    return () => unsubscribe();
+  }, [db]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+      setProfileOpen(false); // Close profile card
+      console.log("User logged out successfully");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
+
+  return (
+    <>
+      <nav className="navbar">
+        {/* Logo & Site Name */}
+        <Link href="/">
+          <Image src="/images/logo.png" alt="SnackSense Logo" className="site-logo" width={50} height={50} />
+        </Link>
+
+        {/* Desktop Links */}
+        <ul className="nav-links">
+          <li><Link href="/home">Home</Link></li>
+          <li><Link href="/upload">Upload</Link></li>
+          <li><Link href="/about">About</Link></li>
+          <li><Link href="/contact">Contact</Link></li>
+          {user && (
+            <li className="profile-item">
+              <User
+                className="user-icon"
+                size={24}
+                onClick={() => setProfileOpen(!profileOpen)}
+              />
+              {profileOpen && (
+                <div className="profile-card">
+                  <p className="user-name">{user.name || "Unknown User"}</p>
+                  <button className="logout-button" onClick={handleLogout}>
+                    Logout
+                  </button>
+                </div>
+              )}
+            </li>
+          )}
+        </ul>
+
+        {/* Mobile Menu Button */}
+        <div className="menu-icon" onClick={() => setIsOpen(!isOpen)}>
+          <div className={`bar ${isOpen ? "open" : ""}`}></div>
+          <div className={`bar ${isOpen ? "open" : ""}`}></div>
+          <div className={`bar ${isOpen ? "open" : ""}`}></div>
+        </div>
+
+        {/* Mobile Dropdown Menu */}
+        <ul className={`mobile-menu ${isOpen ? "active" : ""}`}>
+          <li><Link href="/home" onClick={() => setIsOpen(false)}>Home</Link></li>
+          <li><Link href="/upload" onClick={() => setIsOpen(false)}>Upload</Link></li>
+          <li><Link href="/about" onClick={() => setIsOpen(false)}>About</Link></li>
+          <li><Link href="/contact" onClick={() => setIsOpen(false)}>Contact</Link></li>
+          {user && (
+            <li className="profile-item">
+              <User
+                className="user-icon"
+                size={24}
+                onClick={() => {
+                  setProfileOpen(!profileOpen);
+                  setIsOpen(false); // Close mobile menu if open
+                }}
+              />
+              {profileOpen && (
+                <div className="profile-card">
+                  <p className="user-name">{user.name || "Unknown User"}</p>
+                  <button className="logout-button" onClick={handleLogout}>
+                    Logout
+                  </button>
+                </div>
+              )}
+            </li>
+          )}
+        </ul>
+      </nav>
+    </>
+  );
+}

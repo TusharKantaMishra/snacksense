@@ -1,25 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import { usePathname } from "next/navigation"; // Import usePathname hook
 import "../styles/globals.css"; // Import global styles
-import Navbar from "../app/components/Navbar"; // Import Navbar
-import Footer from "../app/components/Footer"; // Import Footer
+import Navbar from "./components/Navbar"; // Import Navbar
+import Footer from "./components/Footer"; // Import Footer
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      const cursor = document.querySelector(".cursor-glow") as HTMLElement;
-      if (cursor) {
-        cursor.style.transform = `translate(${event.clientX}px, ${event.clientY}px)`;
-      }
-    };
+  const pathname = usePathname(); // Get the current route
 
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  // Pages where Navbar & Footer should be hidden
+  const isAuthPage = pathname === "/" || pathname === "/signup";
 
   return (
-    <>  
     <html lang="en">
       <body>
         {/* 🌌 Animated Background */}
@@ -35,16 +27,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* 🌀 Cursor Glow Effect */}
         <div className="cursor-glow"></div>
 
-        {/* 🏆 Navbar */}
-        <Navbar />
+        {/* 🏆 Navbar (Only hide on login/signup pages) */}
+        {!isAuthPage && <Navbar />}
 
         {/* 🌟 Page Content */}
-        <div className="page-container">{children}</div>
+        <div className="page-container">
+          {children}
+        </div>
 
-        {/* ⚡ Footer */}
-        <Footer />
+        {/* ⚡ Footer (Only hide on login/signup pages) */}
+        {!isAuthPage && <Footer />}
       </body>
     </html>
-    </>
   );
 }
