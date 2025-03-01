@@ -6,8 +6,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation"; // Use useRouter from Next.js
 import { auth } from '../firebase/config';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import Image from 'next/image'; // For Image component
 import { getFirestore, doc, setDoc } from 'firebase/firestore'; // For Firestore
 import '../../styles/signup.css'; // Importing external CSS
+import image from '../../../public/images/cropped-logo.png'; // Importing logo image
 
 function Signup() {
   const [name, setName] = useState(''); // New state for name
@@ -50,9 +52,9 @@ function Signup() {
     <div className="register-container">
       {/* Left Section */}
       <div className="register-left">
+        <Image src={image} className='initial-page-logo' alt="Snacksense Logo"  />
         <h1 className="title">SNACKSENSE</h1>
         <p className="subtitle">Packed Food Analysis</p>
-        <Cpu className="cpu-icon" />
       </div>
 
       {/* Right Section - Registration Form */}

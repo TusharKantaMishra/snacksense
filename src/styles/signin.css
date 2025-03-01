@@ -36,11 +36,11 @@
   color: rgba(163, 224, 230, 0.8);
 }
 
-.signin-left .cpu-icon {
+.initial-page-logo {
   color: #00f0ff;
-  width: 3rem;
-  height: 3rem;
-  animation: pulse 1.5s infinite;
+  width: 16rem;
+  height: 16rem;
+  animation: pulse 1.5s infinite alternate;
 }
 
 @keyframes pulse {

@@ -46,10 +46,10 @@
     margin-bottom: 1rem;
   }
   
-  .cpu-icon {
+  .initial-page-logo {
     color: #00f0ff;
-    width: 3rem;
-    height: 3rem;
+    width: 16rem;
+    height: 16rem;
     animation: pulse 1.5s infinite alternate;
   }
   

@@ -1,0 +1,307 @@
+/* 🌌 Background Styling */
+.bg-theme {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  background: radial-gradient(circle, rgba(15, 15, 30, 1) 0%, rgba(5, 5, 15, 1) 100%);
+  color: white;
+}
+
+.site-title {
+  font-size: 4rem;
+  font-family: "Space Grotesk", serif;
+  font-weight: 700;
+}
+
+/* 🎨 Updated Text Colors */
+.text-primary {
+  color: #00eaff; /* Neon Cyan */
+}
+
+.text-accent {
+  color: #ff0080; /* Neon Pink */
+}
+
+/* 🎭 Glassmorphism Card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  padding: 20px;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* ✨ Fade-In Animation */
+.fade-in {
+  animation: fadeInUp 1s ease-in-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 🎨 Floating Glow Effects */
+.glow-primary, .glow-accent {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  filter: blur(120px);
+  opacity: 0.3;
+  animation: floating 4s infinite alternate ease-in-out;
+}
+
+.glow-primary {
+  background-color: #00eaff;
+}
+
+.glow-accent {
+  background-color: #ff0080;
+}
+
+@keyframes floating {
+  from {
+    transform: translateY(0px);
+  }
+  to {
+    transform: translateY(20px);
+  }
+}
+
+/* 📜 Smooth Scroll Effect */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 📊 Floating Figures */
+.figure {
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.15);
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  border-radius: 50%;
+  position: absolute;
+  transition: transform 0.3s ease-in-out;
+}
+
+.figure:hover {
+  transform: scale(1.1) rotate(10deg);
+}
+
+.figure.one {
+  top: 20%;
+  left: 5%;
+}
+
+.figure.two {
+  bottom: 15%;
+  right: 10%;
+}
+
+.figure.three {
+  top: 50%;
+  left: 40%;
+}
+
+/* General page styling */
+.pageContainer {
+  color: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Arial', sans-serif;
+  padding-bottom: 40px;
+}
+
+/* Loading and Error States */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.loadingText {
+  color: #ffb6c1; /* Light pink */
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.errorText {
+  color: #ff6b6b; /* Red */
+  font-size: 1.2rem;
+  text-align: center;
+  max-width: 600px;
+}
+
+/* Loading Spinner */
+.loadingSpinner {
+  border: 8px solid rgba(255, 255, 255, 0.3);
+  border-top: 8px solid #ff0080;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hero Section */
+.heroSection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 70px 20px;
+}
+
+.fadeIn {
+  animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+.heroTitle {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #ffb6c1; /* Light pink */
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  margin-bottom: 15px;
+}
+
+.heroDescription {
+  font-size: 1.2rem;
+  color: #e2e8f0; /* Light gray */
+  max-width: 700px;
+  line-height: 1.7;
+  margin-bottom: 25px;
+}
+
+.heroButton {
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(45deg, #00eaff, #ff0080);
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0px 0px 15px rgba(0, 234, 255, 0.7);
+}
+
+.heroButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0px 0px 25px rgba(0, 234, 255, 1);
+}
+
+/* How It Works and Benefits Sections */
+.howItWorksSection,
+.benefitsSection {
+  width: 100%;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.sectionTitle {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #ffb6c1;
+  margin-bottom: 30px;
+}
+
+/* Grid Layout */
+.gridContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.gridItem {
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.6s ease-out forwards;
+}
+
+.gridTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #b19cd9; /* Light purple */
+  margin-bottom: 12px;
+}
+
+.gridText {
+  font-size: 0.95rem;
+  color: #e2e8f0;
+  line-height: 1.6;
+}
+
+/* Animation Delays */
+.delay0 {
+  animation-delay: 0s;
+}
+
+.delay1 {
+  animation-delay: 0.2s;
+}
+
+.delay2 {
+  animation-delay: 0.4s;
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.8rem;
+  }
+
+  .heroButton {
+    padding: 8px 20px;
+  }
+}

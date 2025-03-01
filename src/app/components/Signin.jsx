@@ -6,7 +6,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { auth } from '../firebase/config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import Image from "next/image";
 import '../../styles/signin.css'; // Importing external CSS
+import image from '../../../public/images/cropped-logo.png'; // Importing image
 
 function SignIn() {
   const [email, setEmail] = useState('');
@@ -62,9 +64,9 @@ function SignIn() {
   return (
     <div className="signin-container">
       <div className="signin-left">
+        <Image src={image} alt="SnackSense Logo" className="initial-page-logo" />
         <h1 className="title">SNACKSENSE</h1>
         <p className="subtitle">Packed Food Analysis</p>
-        <Cpu className="cpu-icon" />
       </div>
 
       <div className="signin-right">

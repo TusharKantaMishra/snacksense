@@ -1,6 +1,7 @@
 // Import the functions you need from the Firebase SDKs
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getFirestore } from "firebase/firestore";
 
 // Firebase configuration using Next.js environment variables
 const firebaseConfig = {
@@ -13,10 +14,10 @@ const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID // Optional, only if using Analytics
 };
 
-// Initialize Firebase app (only if not already initialized)
+
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Firebase Authentication
 const auth = getAuth(app);
 
 export { app, auth };
+export const db = getFirestore(app);

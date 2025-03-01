@@ -1,68 +1,118 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import "../../styles/home.css"; // Importing external CSS file
+import { db } from "../firebase/config"; // Ensure path is correct
+import { doc, getDoc } from "firebase/firestore";
+import styles from "../../styles/home.module.css";
 
 export default function Home() {
   const [visible, setVisible] = useState(false);
+  interface Content {
+    hero: {
+      title: string;
+      description: string;
+      buttonText: string;
+    };
+    howItWorks: {
+      title: string;
+      steps: { step: string; desc: string }[];
+    };
+    benefits: {
+      title: string;
+      items: { title: string; text: string }[];
+    };
+  }
+
+  const [content, setContent] = useState<Content | null>(null);
+  const [error, setError] = useState<string | null>(null); // Add error state for better debugging
 
   useEffect(() => {
-    setTimeout(() => {
+    async function fetchContent() {
+      try {
+        const docRef = doc(db, "homepageContent", "main");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setContent(docSnap.data() as Content);
+        } else {
+          setError("No content found in Firestore!");
+          console.log("No content found!");
+        }
+      } catch (err) {
+        setError("Failed to fetch data: " + (err instanceof Error ? err.message : "Unknown error"));
+        console.error("Error fetching Firestore data: ", err);
+      }
+    }
+
+    fetchContent();
+
+    // Fade-in effect
+    const timer = setTimeout(() => {
       setVisible(true);
     }, 500);
+
+    // Cleanup timer to prevent memory leaks
+    return () => clearTimeout(timer);
   }, []);
 
-  return (
-    <div className="bg-darkBlue text-white min-h-screen flex flex-col items-center">
+  // Handle loading and error states
+  if (error) {
+    return (
+      <div className={styles.errorContainer}>
+        <p className={styles.errorText}>{error}</p>
+      </div>
+    );
+  }
 
+  if (!content) {
+    return (
+      <div className={styles.loadingContainer}>
+        <p className={styles.loadingText}>Loading...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.pageContainer}>
       {/* 🌟 Hero Section */}
-      <section className={`relative w-full flex flex-col items-center text-center py-24 px-4 ${visible ? "fade-in" : ""}`}>
-        <h1 className="text-6xl font-extrabold text-gold drop-shadow-lg site-title">
-          SnackSense 🍿
-        </h1>
-        <p className="mt-4 text-lg text-gray-300 max-w-2xl">
-          AI-powered snack insights. Scan food packets and make healthier choices.
-        </p>
-        
+      <section className={`${styles.heroSection} ${visible ? styles.fadeIn : ""}`}>
+        <h1 className={styles.heroTitle}>{content.hero.title}</h1>
+        <p className={styles.heroDescription}>{content.hero.description}</p>
         <Link href="/upload">
-          <button className="elegant-button mt-8">🚀 Upload an Image</button>
+          <button className={styles.heroButton}>{content.hero.buttonText}</button>
         </Link>
       </section>
 
       {/* 🔄 How It Works Section */}
-      <section className="text-center py-16 px-6 w-full bg-gray-900 glass-card fade-in">
-        <h2 className="text-4xl font-bold text-gold">How It Works?</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-          {[
-            { step: "1️⃣ Upload a food packet", desc: "Take a picture of the back of the packet." },
-            { step: "2️⃣ AI analyzes ingredients", desc: "Our AI scans the details for better insights." },
-            { step: "3️⃣ Get better alternatives", desc: "See healthier snack options instantly." }
-          ].map((item, index) => (
-            <div key={index} className={`glass-card fade-in delay-${index}`}>
-              <h3 className="text-xl font-semibold text-softOrange">{item.step}</h3>
-              <p className="mt-2 text-gray-300">{item.desc}</p>
+      <section className={styles.howItWorksSection}>
+        <h2 className={styles.sectionTitle}>{content.howItWorks.title}</h2>
+        <div className={styles.gridContainer}>
+          {content.howItWorks.steps.map((item, index) => (
+            <div
+              key={index}
+              className={`${styles.gridItem} ${styles[`delay${index}`]}`}
+            >
+              <h3 className={styles.gridTitle}>{item.step}</h3>
+              <p className={styles.gridText}>{item.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* 🌟 Benefits Section */}
-      <section className="text-center py-16 px-6 w-full">
-        <h2 className="text-4xl font-bold text-gold">Why Use SnackSense?</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
-          {[
-            { title: "🔍 AI Analysis", text: "Our AI scans and evaluates snacks instantly." },
-            { title: "🥗 Healthier Choices", text: "Get personalized snack recommendations." },
-            { title: "📊 Detailed Insights", text: "See ingredient breakdowns and nutrition facts." }
-          ].map((item, index) => (
-            <div key={index} className={`glass-card fade-in delay-${index}`}>
-              <h3 className="text-xl font-semibold text-softOrange">{item.title}</h3>
-              <p className="mt-2 text-gray-300">{item.text}</p>
+      <section className={styles.benefitsSection}>
+        <h2 className={styles.sectionTitle}>{content.benefits.title}</h2>
+        <div className={styles.gridContainer}>
+          {content.benefits.items.map((item, index) => (
+            <div
+              key={index}
+              className={`${styles.gridItem} ${styles[`delay${index}`]}`}
+            >
+              <h3 className={styles.gridTitle}>{item.title}</h3>
+              <p className={styles.gridText}>{item.text}</p>
             </div>
           ))}
         </div>
       </section>
-
     </div>
   );
 }
