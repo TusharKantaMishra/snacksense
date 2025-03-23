@@ -19,6 +19,16 @@ interface IngredientAnalysis {
     minerals?: string[];
   };
   alternatives?: string[];
+  healthScore?: number;
+  dailyValuePercentage?: number;
+  benefits?: string[];
+  riskFactors?: string[];
+  processingLevel?: string;
+  allergenRisk?: string;
+  scientificEvidence?: {
+    level: string;
+  };
+  sustainabilityScore?: number;
 }
 
 // Type definition for window with environment variables
@@ -382,7 +392,7 @@ const Upload: React.FC = () => {
       
       {preview && (
         <div className="mb-6 p-6 border rounded-lg shadow-sm bg-black bg-opacity-70 border-cyan-400/30 glow-border">
-          <h2 className="text-xl font-semibold mb-4 text-white">Image Preview</h2>
+          <h2 className="text-xl font-semibold mb-6 text-white">Image Preview</h2>
           <div className="preview-container relative rounded-lg overflow-hidden border border-gray-700 shadow-lg">
             <Image
               src={preview}
@@ -398,7 +408,8 @@ const Upload: React.FC = () => {
           {loading && (
             <div className="mt-6">
               <div className="progress-container">
-                <div className={`progress-bar progress-width-${Math.round(progress / 5) * 5}`}></div>
+                <div 
+                  className={`progress-bar progress-width-${Math.round(progress / 5) * 5}`}></div>
               </div>
               <p className="text-center text-sm text-cyan-400/70">Processing... {progress}%</p>
             </div>
@@ -488,15 +499,15 @@ const Upload: React.FC = () => {
               return (
                 <div 
                   key={index} 
-                  className="p-4 rounded-lg border border-cyan-400/30 bg-gradient-to-r from-[#0f3460]/50 to-[#533483]/50 backdrop-blur transition-all hover:shadow-lg hover:shadow-cyan-400/20"
+                  className="analysis-result-card p-4 rounded-lg border border-cyan-400/30 bg-gradient-to-r from-[#0f3460]/50 to-[#533483]/50 backdrop-blur transition-all"
                 >
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3">
-                    <h3 className="text-lg font-semibold text-white">{result.ingredient}</h3>
+                    <h3 className="ingredient-name">{result.ingredient}</h3>
                     <div 
-                      className={`mt-2 md:mt-0 px-3 py-1 rounded-full text-sm font-medium ${
-                        result.healthRating === 'Good' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 
-                        result.healthRating === 'Neutral' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' : 
-                        'bg-red-500/20 text-red-400 border border-red-500/30'
+                      className={`mt-2 md:mt-0 px-3 py-1 rounded-full text-sm font-medium health-rating-badge ${
+                        result.healthRating === 'Good' ? 'health-rating-good' : 
+                        result.healthRating === 'Neutral' ? 'health-rating-neutral' : 
+                        'health-rating-bad'
                       }`}
                     >
                       {result.healthRating}
@@ -504,14 +515,14 @@ const Upload: React.FC = () => {
                   </div>
                   
                   <div className="mb-4">
-                    <p className="text-cyan-400/90 mb-2">Health Impact:</p>
-                    <p className="text-gray-300">{result.explanation}</p>
+                    <p className="section-title">Health Impact</p>
+                    <p className="section-content">{result.explanation}</p>
                   </div>
                   
                   {details.length > 0 && (
                     <div className="mb-4">
-                      <p className="text-cyan-400/90 mb-2">Details:</p>
-                      <ul className="details-list text-gray-300">
+                      <p className="section-title">Details</p>
+                      <ul className="details-list">
                         {details.map((detail, i) => (
                           <li key={i} className="ml-5 list-disc">{detail}</li>
                         ))}
@@ -520,9 +531,93 @@ const Upload: React.FC = () => {
                   )}
                   
                   {alternatives && (
-                    <div>
-                      <p className="text-cyan-400/90 mb-2">Healthier Alternatives:</p>
-                      <p className="text-gray-300">{alternatives}</p>
+                    <div className="mb-4">
+                      <p className="section-title">Healthier Alternatives</p>
+                      <p className="section-content">{alternatives}</p>
+                    </div>
+                  )}
+                  
+                  {result.healthScore !== undefined && (
+                    <div className="health-score">
+                      <div className="score-bar">
+                        <div 
+                          className={`score-indicator width-${Math.round(result.healthScore)}`}
+                        />
+                      </div>
+                      <span>{result.healthScore}/100</span>
+                    </div>
+                  )}
+                  
+                  {result.nutritionalInfo && Object.keys(result.nutritionalInfo).length > 0 && (
+                    <div className="info-section">
+                      <h4>Nutritional Information</h4>
+                      <ul className="nutrition-list">
+                        {result.nutritionalInfo.calories && (
+                          <li><strong>Calories:</strong> {result.nutritionalInfo.calories}</li>
+                        )}
+                        {result.nutritionalInfo.protein && (
+                          <li><strong>Protein:</strong> {result.nutritionalInfo.protein}</li>
+                        )}
+                        {result.nutritionalInfo.carbs && (
+                          <li><strong>Carbs:</strong> {result.nutritionalInfo.carbs}</li>
+                        )}
+                        {result.nutritionalInfo.fats && (
+                          <li><strong>Fats:</strong> {result.nutritionalInfo.fats}</li>
+                        )}
+                        {result.nutritionalInfo.vitamins && result.nutritionalInfo.vitamins.length > 0 && (
+                          <li><strong>Vitamins:</strong> {result.nutritionalInfo.vitamins.join(', ')}</li>
+                        )}
+                        {result.nutritionalInfo.minerals && result.nutritionalInfo.minerals.length > 0 && (
+                          <li><strong>Minerals:</strong> {result.nutritionalInfo.minerals.join(', ')}</li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {((result.benefits?.length ?? 0) > 0 || (result.riskFactors?.length ?? 0) > 0) && (
+                    <div className="benefits-risks-container">
+                      {result.benefits && result.benefits.length > 0 && (
+                        <div className="benefits-section">
+                          <h5>Benefits</h5>
+                          <ul className="benefits-list">
+                            {result.benefits.map((benefit, i) => (
+                              <li key={i}>{benefit}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {result.riskFactors && result.riskFactors.length > 0 && (
+                        <div className="risks-section">
+                          <h5>Risk Factors</h5>
+                          <ul className="risks-list">
+                            {result.riskFactors.map((risk, i) => (
+                              <li key={i}>{risk}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {result.processingLevel && (
+                    <div className="mt-4">
+                      <p className="section-title">Processing Level</p>
+                      <p className="section-content">{result.processingLevel}</p>
+                    </div>
+                  )}
+                  
+                  {result.allergenRisk && (
+                    <div className="mt-4">
+                      <p className="section-title">Allergen Risk</p>
+                      <p className="section-content">{result.allergenRisk}</p>
+                    </div>
+                  )}
+                  
+                  {result.scientificEvidence && (
+                    <div className="mt-4">
+                      <p className="section-title">Scientific Evidence</p>
+                      <p className="section-content">{result.scientificEvidence.level}</p>
                     </div>
                   )}
                 </div>
@@ -530,27 +625,28 @@ const Upload: React.FC = () => {
             })}
           </div>
           
-          <div className="mt-8 p-5 rounded-lg border border-cyan-400/50 bg-gradient-to-r from-[#0f3460]/70 to-[#533483]/70">
-            <h3 className="text-lg font-semibold mb-3 text-white">Overall Assessment</h3>
-            <p className="text-gray-300">
-              {(() => {
-                const goodCount = results.filter(item => item.healthRating === 'Good').length;
-                const badCount = results.filter(item => item.healthRating === 'Bad').length;
-                const neutralCount = results.filter(item => item.healthRating === 'Neutral').length;
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={() => {
+                // Clear previous results and reset state
+                setResults([]);
+                setPreview('');
+                setImage(null);
+                setProgress(0);
+                setLoading(false);
+                setError('');
                 
-                if (goodCount > badCount + neutralCount) {
-                  return "This product contains mostly beneficial ingredients. It's a good choice for your health.";
-                } else if (badCount > goodCount + neutralCount) {
-                  return "This product contains several concerning ingredients. Consider looking for healthier alternatives.";
-                } else if (badCount > 0 && badCount >= goodCount) {
-                  return "This product contains some concerning ingredients balanced with some beneficial ones. Consume in moderation.";
-                } else if (neutralCount > goodCount + badCount) {
-                  return "This product contains mostly neutral ingredients. It's neither particularly harmful nor beneficial.";
-                } else {
-                  return "This product contains a mix of ingredients with varying health impacts. Review the details above to make an informed decision.";
-                }
-              })()}
-            </p>
+                // Scroll back to the top of the upload section
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="analyze-another-button px-8 py-3 text-white rounded-full font-medium flex items-center"
+              aria-label="Analyze another food product"
+            >
+              <svg className="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Analyze Another Food
+            </button>
           </div>
         </div>
       )}

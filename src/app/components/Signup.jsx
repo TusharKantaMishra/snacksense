@@ -50,6 +50,17 @@ function Signup() {
 
   return (
     <div className="register-container">
+      {/* Animated background particles */}
+      <div className="particle"></div>
+      <div className="particle"></div>
+      <div className="particle"></div>
+      <div className="particle"></div>
+      <div className="particle"></div>
+      <div className="particle"></div>
+      <div className="particle"></div>
+      <div className="particle"></div>
+      <div className="particle"></div>
+      
       {/* Left Section */}
       <div className="register-left">
         <Image src={image} className='initial-page-logo' alt="Snacksense Logo"  />

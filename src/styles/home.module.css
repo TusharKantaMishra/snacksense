@@ -579,10 +579,11 @@ html {
 }
 
 .gridItem {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(0, 234, 255, 0.3);
-  border-radius: 12px;
+  background: rgba(10, 18, 30, 0.7);
+  border: 1px solid rgba(65, 184, 255, 0.3);
+  border-radius: 15px;
   padding: 30px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -664,5 +665,381 @@ html {
   
   .gridItem {
     padding: 20px;
+  }
+}
+
+/* 📊 Statistics Section Styling */
+.statisticsSection {
+  padding: 4rem 2rem;
+  margin: 5rem 0;
+  position: relative;
+  z-index: 1;
+}
+
+.statsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.statItem {
+  background: rgba(10, 18, 30, 0.7);
+  border: 1px solid rgba(65, 184, 255, 0.3);
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+  min-width: 200px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.statItem::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(65, 184, 255, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.statItem:hover {
+  transform: translateY(-10px);
+  border-color: rgba(65, 184, 255, 0.8);
+  box-shadow: 0 10px 25px rgba(65, 184, 255, 0.2);
+}
+
+.statItem:hover::before {
+  opacity: 1;
+}
+
+.statValue {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(90deg, #41b8ff, #7165ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 1rem;
+  color: #a3b8cc;
+}
+
+/* 👥 Testimonials Section Styling */
+.testimonialsSection {
+  padding: 4rem 2rem;
+  margin: 5rem 0;
+  position: relative;
+  z-index: 1;
+}
+
+.testimonialContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.testimonialCard {
+  background: rgba(10, 18, 30, 0.7);
+  border: 1px solid rgba(65, 184, 255, 0.3);
+  border-radius: 1rem;
+  padding: 2rem;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  position: relative;
+  opacity: 0;
+  animation: fadeIn 1s forwards;
+  animation-delay: var(--delay, 0s);
+}
+
+.testimonialCard:hover {
+  transform: translateY(-5px);
+  border-color: rgba(65, 184, 255, 0.8);
+  box-shadow: 0 10px 25px rgba(65, 184, 255, 0.2);
+}
+
+.testimonialHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.testimonialImageContainer {
+  margin-right: 1rem;
+}
+
+.testimonialImage {
+  border-radius: 50%;
+  border: 2px solid #41b8ff;
+  object-fit: cover;
+}
+
+.testimonialUser {
+  flex: 1;
+}
+
+.testimonialName {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  color: #ffffff;
+}
+
+.testimonialRole {
+  font-size: 0.9rem;
+  color: #41b8ff;
+  margin: 0.2rem 0 0 0;
+}
+
+.testimonialQuote {
+  position: relative;
+  padding-top: 1rem;
+}
+
+.quoteIcon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.5;
+}
+
+.testimonialText {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #a3b8cc;
+  padding-left: 1.5rem;
+  font-style: italic;
+}
+
+/* 🔍 Featured Insights Section Styling */
+.featuredInsightsSection {
+  padding: 4rem 2rem;
+  margin: 5rem 0;
+  position: relative;
+  z-index: 1;
+}
+
+.insightsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.insightCard {
+  background: rgba(10, 18, 30, 0.7);
+  border: 1px solid rgba(65, 184, 255, 0.3);
+  border-radius: 1rem;
+  padding: 2rem;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  animation: fadeIn 1s forwards;
+  animation-delay: var(--delay, 0s);
+}
+
+.insightCard:hover {
+  transform: translateY(-5px);
+  border-color: rgba(65, 184, 255, 0.8);
+  box-shadow: 0 10px 25px rgba(65, 184, 255, 0.2);
+}
+
+.insightIconContainer {
+  width: 60px;
+  height: 60px;
+  background: rgba(65, 184, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.insightIcon {
+  color: #41b8ff;
+}
+
+.insightTitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+.insightText {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #a3b8cc;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.insightLink {
+  color: #41b8ff;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.insightLink:hover {
+  color: #7165ff;
+  text-decoration: underline;
+}
+
+/* 📢 Call to Action Section Styling */
+.ctaSection {
+  padding: 6rem 2rem;
+  margin: 6rem 0 4rem 0;
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  background: rgba(10, 18, 30, 0.7);
+  border: 1px solid rgba(65, 184, 255, 0.3);
+  z-index: 1;
+}
+
+.ctaGlow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(65, 184, 255, 0.2) 0%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.ctaContent {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.ctaTitle {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(90deg, #41b8ff, #7165ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ctaText {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  color: #a3b8cc;
+  margin-bottom: 2.5rem;
+}
+
+.ctaButtons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.primaryCtaButton {
+  background: linear-gradient(90deg, #41b8ff, #7165ff);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.primaryCtaButton:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(65, 184, 255, 0.4);
+}
+
+.secondaryCtaButton {
+  background: transparent;
+  color: #41b8ff;
+  border: 2px solid #41b8ff;
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.secondaryCtaButton:hover {
+  background: rgba(65, 184, 255, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(65, 184, 255, 0.15);
+}
+
+/* Animation Delays */
+.delay0 {
+  --delay: 0.2s;
+}
+
+.delay1 {
+  --delay: 0.4s;
+}
+
+.delay2 {
+  --delay: 0.6s;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ctaTitle {
+    font-size: 2.2rem;
+  }
+  
+  .statsContainer {
+    gap: 1.5rem;
+  }
+  
+  .statItem {
+    min-width: 150px;
+    padding: 1.5rem;
+  }
+  
+  .statValue {
+    font-size: 2.5rem;
+  }
+  
+  .ctaButtons {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+  
+  .testimonialContainer,
+  .insightsContainer {
+    grid-template-columns: 1fr;
   }
 }

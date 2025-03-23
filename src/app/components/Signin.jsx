@@ -63,6 +63,17 @@ function SignIn() {
 
   return (
     <div className="signin-container">
+      {/* Animated background particles */}
+      <div className="particle"></div>
+      <div className="particle"></div>
+      <div className="particle"></div>
+      <div className="particle"></div>
+      <div className="particle"></div>
+      <div className="particle"></div>
+      <div className="particle"></div>
+      <div className="particle"></div>
+      <div className="particle"></div>
+      
       <div className="signin-left">
         <Image src={image} alt="SnackSense Logo" className="initial-page-logo" />
         <h1 className="title">SNACKSENSE</h1>

@@ -2,9 +2,15 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import styles from '../../styles/about.module.css';
+import { useAboutContent } from '@/hooks/useAboutContent';
 
 export default function About() {
   const [visible, setVisible] = useState(false);
+  const { loading, error, getContentBySection } = useAboutContent();
+
+  const missionContent = getContentBySection('mission');
+  const storyContent = getContentBySection('story');
+  const howItWorksContent = getContentBySection('how-it-works');
 
   useEffect(() => {
     setVisible(true);
@@ -51,8 +57,8 @@ export default function About() {
       <section className={styles.imageSection}>
         <div className={styles.imageWrapper}>
           <Image 
-            src="/images/food-analysis-hero.jpg" 
-            alt="AI Food Analysis" 
+            src="/images/food-analysis-hero.jpeg" 
+            alt="AI Food Analysis Device" 
             fill
             style={{ objectFit: 'cover' }}
           />
@@ -66,12 +72,27 @@ export default function About() {
       <section className={styles.contentSection}>
         <h2 className={styles.sectionTitle}>Our Mission</h2>
         <div className={styles.missionCard}>
-          <p className={styles.missionText}>
-            At SnackSense, we&apos;re on a mission to empower consumers with transparent, accessible information about the food they consume. In today&apos;s fast-paced world, understanding what&apos;s in your food shouldn&apos;t require a degree in chemistry or nutrition. We&apos;ve developed cutting-edge AI technology that instantly analyzes food ingredients, providing clear, actionable insights about their health implications.
-          </p>
-          <p className={`${styles.missionText} ${styles.missionTextSpacing}`}>
-            We believe that everyone deserves to make informed choices about what they eat. Our platform bridges the gap between complex ingredient lists and practical health knowledge, making nutrition science accessible to all. By demystifying food labels, we aim to foster a healthier relationship between consumers and their food, promoting wellness through awareness and education.
-          </p>
+          {loading ? (
+            <p>Loading mission content...</p>
+          ) : error ? (
+            <p>Error loading content: {error}</p>
+          ) : missionContent.length > 0 ? (
+            missionContent.map((item) => (
+              <div key={item.id}>
+                {item.subtitle && <h3 className={styles.missionSubtitle}>{item.subtitle}</h3>}
+                <p className={styles.missionText}>{item.content}</p>
+              </div>
+            ))
+          ) : (
+            <>
+              <p className={styles.missionText}>
+                At SnackSense, we&#39;re on a mission to empower consumers with transparent, accessible information about the food they consume. In today&#39;s fast-paced world, understanding what&#39;s in your food shouldn&#39;t require a degree in chemistry or nutrition. We&#39;ve developed cutting-edge AI technology that instantly analyzes food ingredients, providing clear, actionable insights about their health implications.
+              </p>
+              <p className={`${styles.missionText} ${styles.missionTextSpacing}`}>
+                We believe that everyone deserves to make informed choices about what they eat. Our platform bridges the gap between complex ingredient lists and practical health knowledge, making nutrition science accessible to all. By demystifying food labels, we aim to foster a healthier relationship between consumers and their food, promoting wellness through awareness and education.
+              </p>
+            </>
+          )}
         </div>
       </section>
 
@@ -80,23 +101,86 @@ export default function About() {
         <div className={styles.textColumn}>
           <h2 className={styles.sectionTitle}>Our Story</h2>
           <div className={styles.missionCard}>
-            <p className={styles.missionText}>
-              SnackSense was born from a personal frustration shared by our founders. While shopping for groceries, they found themselves spending excessive time researching unfamiliar ingredients on food packages, often finding contradictory or overly technical information. They envisioned a solution that could instantly decode these complex ingredient lists and provide straightforward health assessments.
-            </p>
-            <p className={`${styles.missionText} ${styles.missionTextSpacing}`}>
-              In 2023, this vision became reality when our team of nutritionists, data scientists, and software engineers came together to develop the SnackSense platform. We began by building a comprehensive database of food ingredients, their health implications, and scientific research. This foundation powers our AI engine, which continues to learn and improve with each analysis.
-            </p>
+            {loading ? (
+              <p>Loading story content...</p>
+            ) : error ? (
+              <p>Error loading content: {error}</p>
+            ) : storyContent.length > 0 ? (
+              storyContent.map((item) => (
+                <div key={item.id}>
+                  {item.subtitle && <h3 className={styles.missionSubtitle}>{item.subtitle}</h3>}
+                  <p className={styles.missionText}>{item.content}</p>
+                </div>
+              ))
+            ) : (
+              <>
+                <p className={styles.missionText}>
+                  SnackSense was born from a personal frustration shared by our founders. While shopping for groceries, they found themselves spending excessive time researching unfamiliar ingredients on food packages, often finding contradictory or overly technical information. They envisioned a solution that could instantly decode these complex ingredient lists and provide straightforward health assessments.
+                </p>
+                <p className={`${styles.missionText} ${styles.missionTextSpacing}`}>
+                  In 2023, this vision became reality when our team of nutritionists, data scientists, and software engineers came together to develop the SnackSense platform. We began by building a comprehensive database of food ingredients, their health implications, and scientific research. This foundation powers our AI engine, which continues to learn and improve with each analysis.
+                </p>
+              </>
+            )}
           </div>
         </div>
         <div className={styles.imageColumn}>
           <div className={styles.imageWrapper}>
             <Image 
-              src="/images/food-ingredients-database.jpg" 
+              src="/images/ingredient-database.jpeg" 
               alt="Food Ingredients Database" 
               fill
               style={{ objectFit: 'cover' }}
             />
           </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className={styles.contentSection}>
+        <h2 className={styles.sectionTitle}>How It Works</h2>
+        <div className={styles.missionCard}>
+          {loading ? (
+            <p>Loading how it works content...</p>
+          ) : error ? (
+            <p>Error loading content: {error}</p>
+          ) : howItWorksContent.length > 0 ? (
+            howItWorksContent.map((item) => (
+              <div key={item.id}>
+                {item.subtitle && <h3 className={styles.missionSubtitle}>{item.subtitle}</h3>}
+                <p className={styles.missionText}>{item.content}</p>
+              </div>
+            ))
+          ) : (
+            <>
+              <p className={styles.missionText}>
+                SnackSense uses advanced AI technology to analyze food ingredients and provide clear, actionable insights about their health implications. Our platform is designed to be user-friendly and accessible, making it easy for anyone to understand what&#39;s in their food and how it affects their health.
+              </p>
+              <p className={`${styles.missionText} ${styles.missionTextSpacing}`}>
+                Here&#39;s how it works:
+              </p>
+              <ul className={styles.howItWorksList}>
+                <li className={styles.howItWorksItem}>
+                  <span className={styles.howItWorksStep}>1. Scan or Search</span>
+                  <p className={styles.howItWorksDescription}>
+                    Simply scan the barcode of a food product or search for it in our database.
+                  </p>
+                </li>
+                <li className={styles.howItWorksItem}>
+                  <span className={styles.howItWorksStep}>2. Analyze Ingredients</span>
+                  <p className={styles.howItWorksDescription}>
+                    Our AI engine analyzes the ingredients in the product and identifies potential health concerns.
+                  </p>
+                </li>
+                <li className={styles.howItWorksItem}>
+                  <span className={styles.howItWorksStep}>3. Get Personalized Recommendations</span>
+                  <p className={styles.howItWorksDescription}>
+                    Based on your dietary needs and preferences, we provide personalized recommendations for healthier alternatives.
+                  </p>
+                </li>
+              </ul>
+            </>
+          )}
         </div>
       </section>
 
@@ -158,7 +242,7 @@ export default function About() {
             <div className={styles.valueContent}>
               <h3 className={styles.valueTitle}>Innovation</h3>
               <p className={styles.valueText}>
-                We continuously push the boundaries of what&apos;s possible with food analysis technology, investing in research and development to enhance our capabilities. By staying at the forefront of AI and nutritional science, we ensure our platform remains the most advanced and reliable tool for food ingredient analysis.
+                We continuously push the boundaries of what&#39;s possible with food analysis technology, investing in research and development to enhance our capabilities. By staying at the forefront of AI and nutritional science, we ensure our platform remains the most advanced and reliable tool for food ingredient analysis.
               </p>
             </div>
           </div>
@@ -172,7 +256,7 @@ export default function About() {
             <div className={styles.valueContent}>
               <h3 className={styles.valueTitle}>User Empowerment</h3>
               <p className={styles.valueText}>
-                We don&apos;t just provide information—we empower users to make better choices. Our suggestions and alternatives help users take actionable steps toward healthier eating. By giving users the tools they need to understand their food, we enable them to take control of their nutrition and overall health.
+                We don&#39;t just provide information—we empower users to make better choices. Our suggestions and alternatives help users take actionable steps toward healthier eating. By giving users the tools they need to understand their food, we enable them to take control of their nutrition and overall health.
               </p>
             </div>
           </div>
@@ -184,7 +268,7 @@ export default function About() {
         <div className={styles.imageColumn}>
           <div className={styles.imageWrapper}>
             <Image 
-              src="/images/health-impact.jpg" 
+              src="/images/people-impact.jpeg" 
               alt="Health Impact" 
               fill
               style={{ objectFit: 'cover' }}
@@ -198,10 +282,10 @@ export default function About() {
               Since our launch, SnackSense has analyzed over 5 million food products, helping more than 500,000 users make informed dietary choices. Our community reports a 78% increase in confidence when selecting packaged foods and a 45% reduction in consumption of artificial additives and preservatives.
             </p>
             <p className={`${styles.missionText} ${styles.missionTextSpacing}`}>
-              Beyond individual users, we&apos;re proud to partner with educational institutions, healthcare providers, and food manufacturers who use our technology to promote healthier food options. Through these collaborations, we&apos;re helping shape a future where transparency in food ingredients becomes the industry standard.
+              Beyond individual users, we&#39;re proud to partner with educational institutions, healthcare providers, and food manufacturers who use our technology to promote healthier food options. Through these collaborations, we&#39;re helping shape a future where transparency in food ingredients becomes the industry standard.
             </p>
             <p className={`${styles.missionText} ${styles.missionTextSpacing}`}>
-              As we continue to grow, our commitment to improving global nutrition literacy remains unwavering. Every scan, every analysis, and every recommendation brings us one step closer to our vision of a world where everyone can easily understand what&apos;s in their food and how it affects their health.
+              As we continue to grow, our commitment to improving global nutrition literacy remains unwavering. Every scan, every analysis, and every recommendation brings us one step closer to our vision of a world where everyone can easily understand what&#39;s in their food and how it affects their health.
             </p>
           </div>
         </div>

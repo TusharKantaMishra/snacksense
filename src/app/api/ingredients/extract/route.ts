@@ -20,6 +20,21 @@ export async function POST(request: NextRequest) {
     // Extract composition and ingredients information
     const result = extractIngredientsData(text);
     
+    // Ensure we always return at least some ingredients
+    if (!result.ingredients || result.ingredients.length === 0) {
+      // Fallback to a very basic extraction as last resort
+      const fallbackIngredients: IngredientData[] = text
+        .split(/[,.\n;]/)
+        .map((part: string) => part.trim())
+        .filter((part: string) => part.length > 3)
+        .map((part: string) => ({ name: part }));
+      
+      if (fallbackIngredients.length > 0) {
+        result.ingredients = fallbackIngredients;
+        result.format = 'fallback';
+      }
+    }
+    
     return NextResponse.json(result);
   } catch (error) {
     console.error('Ingredients extraction error:', error);
@@ -225,18 +240,64 @@ function parseNutritionFactsFormat(text: string): IngredientData[] {
 function parseBasicIngredients(text: string): IngredientData[] {
   const ingredients: IngredientData[] = [];
   
-  // Split by common delimiters
-  const parts = text.split(/,|\(|\)|\n/).filter(part => part.trim().length > 0);
+  // First try to find an ingredients section
+  const ingredientsSection = text.match(/ingredients:?\s*([\s\S]+?)(?:\.|$)/i);
+  const textToProcess = ingredientsSection ? ingredientsSection[1] : text;
   
+  // Split by common delimiters
+  const parts = textToProcess
+    .split(/,|\(|\)|\n|;|•|\./)
+    .map(part => part.trim())
+    .filter(part => part.length > 0);
+  
+  // Filter out common non-ingredient phrases
   for (let part of parts) {
     part = part.trim();
-    if (!part || part.toLowerCase().includes('may contain')) continue;
+    
+    // Skip common non-ingredient phrases
+    if (!part || 
+        part.toLowerCase().includes('may contain') ||
+        part.toLowerCase().includes('manufactured in') ||
+        part.toLowerCase().includes('produced by') ||
+        part.match(/^\d+%$/) || // Skip percentage-only entries
+        part.match(/^[a-z\s]+:$/i) // Skip section headers
+    ) {
+      continue;
+    }
     
     // Remove common words that aren't ingredients
-    part = part.replace(/^and\s+|^contains\s+|^including\s+/i, '').trim();
+    part = part.replace(/^and\s+|^contains\s+|^including\s+|^ingredients\s+|^with\s+/i, '').trim();
     
-    if (part) {
-      ingredients.push({ name: part });
+    // Extract quantity if present
+    let quantity: string | undefined;
+    const quantityMatch = part.match(/(\d+(?:\.\d+)?(?:\s*[a-z]+)?)\s+(.+)/i);
+    
+    if (quantityMatch) {
+      quantity = quantityMatch[1];
+      part = quantityMatch[2];
+    }
+    
+    if (part && part.length > 1) { // Ensure we have a meaningful ingredient name (more than 1 character)
+      ingredients.push({ 
+        name: part,
+        quantity: quantity
+      });
+    }
+  }
+  
+  // If we still have no ingredients, try a more aggressive approach
+  if (ingredients.length === 0) {
+    // Look for words that are likely ingredients (more than 3 characters, not common stop words)
+    const stopWords = ['the', 'and', 'with', 'from', 'that', 'this', 'for', 'are', 'not'];
+    const words = text.split(/\s+/).filter((word: string) => {
+      const cleanWord = word.replace(/[^a-z]/gi, '').toLowerCase();
+      return cleanWord.length > 3 && !stopWords.includes(cleanWord);
+    });
+    
+    for (const word of words) {
+      if (!ingredients.some(ing => ing.name.toLowerCase() === word.toLowerCase())) {
+        ingredients.push({ name: word });
+      }
     }
   }
   
