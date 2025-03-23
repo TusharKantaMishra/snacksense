@@ -73,9 +73,36 @@ export default function Home() {
 
   return (
     <div className={styles.pageContainer}>
+      {/* Futuristic background elements */}
+      <div className={styles.circuitContainer}>
+        <div className={styles.circuitLine}></div>
+        <div className={styles.circuitLine}></div>
+        <div className={styles.circuitLine}></div>
+        <div className={styles.circuitLine}></div>
+        <div className={styles.circuitVertical}></div>
+        <div className={styles.circuitVertical}></div>
+        <div className={styles.circuitVertical}></div>
+        <div className={styles.circuitVertical}></div>
+        <div className={styles.circuitNode}></div>
+        <div className={styles.circuitNode}></div>
+        <div className={styles.circuitNode}></div>
+        <div className={styles.circuitNode}></div>
+      </div>
+      
+      {/* Floating data particles */}
+      <div className={styles.dataParticle}></div>
+      <div className={styles.dataParticle}></div>
+      <div className={styles.dataParticle}></div>
+      <div className={styles.dataParticle}></div>
+      <div className={styles.dataParticle}></div>
+      <div className={styles.dataParticle}></div>
+      <div className={styles.dataParticle}></div>
+      <div className={styles.dataParticle}></div>
+      <div className={styles.dataParticle}></div>
+      
       {/* 🌟 Hero Section */}
       <section className={`${styles.heroSection} ${visible ? styles.fadeIn : ""}`}>
-        <h1 className={styles.heroTitle}>{content.hero.title}</h1>
+        <h1 className={`${styles.heroTitle} ${styles.futuristicHeading}`}>{content.hero.title}</h1>
         <p className={styles.heroDescription}>{content.hero.description}</p>
         <Link href="/upload">
           <button className={styles.heroButton}>{content.hero.buttonText}</button>
@@ -84,12 +111,12 @@ export default function Home() {
 
       {/* 🔄 How It Works Section */}
       <section className={styles.howItWorksSection}>
-        <h2 className={styles.sectionTitle}>{content.howItWorks.title}</h2>
+        <h2 className={`${styles.sectionTitle} ${styles.futuristicHeading}`}>{content.howItWorks.title}</h2>
         <div className={styles.gridContainer}>
           {content.howItWorks.steps.map((item, index) => (
             <div
               key={index}
-              className={`${styles.gridItem} ${styles[`delay${index}`]}`}
+              className={`${styles.gridItem} ${styles[`delay${index}`]} ${styles.glowBorder} ${styles.scannerEffect}`}
             >
               <h3 className={styles.gridTitle}>{item.step}</h3>
               <p className={styles.gridText}>{item.desc}</p>
@@ -100,12 +127,12 @@ export default function Home() {
 
       {/* 🌟 Benefits Section */}
       <section className={styles.benefitsSection}>
-        <h2 className={styles.sectionTitle}>{content.benefits.title}</h2>
+        <h2 className={`${styles.sectionTitle} ${styles.futuristicHeading}`}>{content.benefits.title}</h2>
         <div className={styles.gridContainer}>
           {content.benefits.items.map((item, index) => (
             <div
               key={index}
-              className={`${styles.gridItem} ${styles[`delay${index}`]}`}
+              className={`${styles.gridItem} ${styles[`delay${index}`]} ${styles.glowBorder} ${styles.scannerEffect}`}
             >
               <h3 className={styles.gridTitle}>{item.title}</h3>
               <p className={styles.gridText}>{item.text}</p>

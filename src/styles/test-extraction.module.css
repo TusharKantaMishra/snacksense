@@ -1,0 +1,225 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  color: #f0f0f0;
+}
+
+.title {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  background: linear-gradient(90deg, #00eaff, #3c8ce7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.uploadSection,
+.textSection,
+.resultSection {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.fileInputLabel {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  margin: 1rem 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f0f0f0;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.fileInputLabel:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.imagePreview {
+  margin: 1rem 0;
+  display: flex;
+  justify-content: center;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.previewImage {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+}
+
+.textArea {
+  width: 100%;
+  min-height: 200px;
+  padding: 1rem;
+  margin: 1rem 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f0f0f0;
+  font-family: monospace;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.button,
+.extractButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f0f0f0;
+}
+
+.button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.extractButton {
+  background: linear-gradient(90deg, #00eaff, #3c8ce7);
+  color: #0f172a;
+  width: 100%;
+  margin-top: 1rem;
+  font-size: 1.1rem;
+}
+
+.extractButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 234, 255, 0.3);
+}
+
+.extractButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.error {
+  color: #ff6b6b;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 8px;
+  border-left: 3px solid #ff6b6b;
+}
+
+.resultSection {
+  animation: fadeIn 0.5s ease;
+}
+
+.resultCard {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.resultCard h3 {
+  margin-top: 0;
+  color: #00eaff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.resultCard h4 {
+  color: #f0f0f0;
+  margin: 1rem 0 0.5rem;
+}
+
+.ingredientsTable {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.ingredientsTable table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.ingredientsTable th {
+  background: rgba(0, 234, 255, 0.1);
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: #00eaff;
+}
+
+.ingredientsTable td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ingredientsTable tr:last-child td {
+  border-bottom: none;
+}
+
+.ingredientsTable tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .ingredientsTable {
+    font-size: 0.9rem;
+  }
+  
+  .ingredientsTable th,
+  .ingredientsTable td {
+    padding: 0.5rem;
+  }
+}

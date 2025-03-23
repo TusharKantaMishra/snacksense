@@ -1,0 +1,62 @@
+import { NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+export async function POST(request: Request) {
+  console.log('Request received');
+  try {
+    const { text } = await request.json();
+    console.log('Text received:', text);
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    console.log('API Key:', apiKey ? 'Found' : 'Not found');
+
+    if (!apiKey) {
+      return NextResponse.json({ error: 'Missing GEMINI_API_KEY' }, { status: 500 });
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    console.log('Generative AI initialized');
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    console.log('Model selected');
+
+    const prompt = `Analyze the following ingredients: ${text}. Provide a list of ingredients with health ratings (Good, Neutral, Bad) and a brief explanation for each. Format the response as a JSON array of objects, where each object has 'ingredient', 'healthRating', and 'explanation' properties.`;
+    console.log('Prompt:', prompt);
+
+    const result = await model.generateContent(prompt);
+    console.log('Response received:', result.response.text());
+
+    let ingredientAnalysis: { ingredient: string; healthRating: string; explanation: string }[] = [];
+    try {
+      ingredientAnalysis = JSON.parse(result.response.text());
+    } catch (parseError) {
+      console.log('JSON parse failed:', parseError);
+      ingredientAnalysis = parsePlainTextAnalysis(result.response.text());
+    }
+
+    return NextResponse.json(ingredientAnalysis);
+  } catch (error) {
+    console.error('Error:', error);
+    return NextResponse.json({ error: 'Internal server error', details: error.message }, { status: 500 });
+  }
+}
+
+function parsePlainTextAnalysis(text: string): { ingredient: string; healthRating: string; explanation: string }[] {
+  console.log('Parsing plain text:', text);
+  const lines = text.split('\n').filter(line => line.trim());
+  const analysis: { ingredient: string; healthRating: string; explanation: string }[] = [];
+
+  for (const line of lines) {
+    const match = line.match(/(.+?):\s*(\w+)\s*-\s*(.+)/);
+    if (match) {
+      analysis.push({
+        ingredient: match[1].trim(),
+        healthRating: match[2],
+        explanation: match[3].trim(),
+      });
+    }
+  }
+
+  console.log('Parsed analysis:', analysis);
+  return analysis.length > 0 ? analysis : [{ ingredient: 'Unknown', healthRating: 'Neutral', explanation: 'No specific analysis' }];
+}
