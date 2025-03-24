@@ -77,9 +77,6 @@
 }
 
 /* 📜 Smooth Scroll Effect */
-html {
-  scroll-behavior: smooth;
-}
 
 /* 📊 Floating Figures */
 .figure {

@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
 
 /* 🌌 AI-Themed Background (Universal) */
 /* 🌌 Animated Background with Glowing Particles */
@@ -359,5 +363,3 @@ body {
     @apply bg-background text-foreground;
   }
 }
-
-
