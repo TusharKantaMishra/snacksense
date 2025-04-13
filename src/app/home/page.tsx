@@ -85,7 +85,7 @@ export default function Home() {
   // Fallback content in case Firestore data isn't available
   const fallbackContent = {
     hero: {
-      title: "Discover What's Really In Your Food",
+      title: "SnackSense",
       description: "SnackSense uses AI to analyze food ingredients and provide simple, personalized insights about what you're eating.",
       buttonText: "Analyze Your Food Now"
     },
@@ -205,7 +205,7 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className={`${styles.section} ${styles.howItWorksSection} ${visible ? styles.fadeIn : ""}`}>
+      <section className={`${styles.howItWorksSection} ${visible ? styles.fadeIn : ""}`}>
         <h2 className={styles.sectionTitle}>{displayContent.howItWorks.title}</h2>
         <div className={styles.stepsContainer}>
           {displayContent.howItWorks.steps.map((step, index) => (
@@ -219,7 +219,7 @@ export default function Home() {
       </section>
 
       {/* Benefits Section */}
-      <section className={`${styles.section} ${styles.benefitsSection} ${visible ? styles.fadeIn : ""}`}>
+      <section className={`${styles.benefitsSection} ${visible ? styles.fadeIn : ""}`}>
         <h2 className={styles.sectionTitle}>{displayContent.benefits.title}</h2>
         <div className={styles.benefitsContainer}>
           {displayContent.benefits.items.map((benefit, index) => (
@@ -232,11 +232,11 @@ export default function Home() {
       </section>
 
       {/* Statistics Section */}
-      <section className={`${styles.section} ${styles.statisticsSection} ${visible ? styles.fadeIn : ""}`}>
+      <section className={`${styles.statisticsSection} ${visible ? styles.fadeIn : ""}`}>
         <h2 className={styles.sectionTitle}>{displayContent.statistics.title}</h2>
         <div className={styles.statsContainer}>
           {displayContent.statistics.items.map((stat, index) => (
-            <div key={index} className={styles.statCard}>
+            <div key={index} className={styles.statItem}>
               <div className={styles.statValue}>{stat.value}</div>
               <div className={styles.statLabel}>{stat.label}</div>
             </div>
@@ -245,7 +245,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className={`${styles.section} ${styles.testimonialsSection} ${visible ? styles.fadeIn : ""}`}>
+      <section className={`${styles.testimonialsSection} ${visible ? styles.fadeIn : ""}`}>
         <h2 className={styles.sectionTitle}>{displayContent.testimonials.title}</h2>
         <div className={styles.testimonialsContainer}>
           {displayContent.testimonials.items.map((testimonial, index) => (
@@ -272,7 +272,7 @@ export default function Home() {
       </section>
 
       {/* Featured Insights Section */}
-      <section className={`${styles.section} ${styles.insightsSection} ${visible ? styles.fadeIn : ""}`}>
+      <section className={`${styles.insightsSection} ${visible ? styles.fadeIn : ""}`}>
         <h2 className={styles.sectionTitle}>{displayContent.featuredInsights.title}</h2>
         <div className={styles.insightsContainer}>
           {displayContent.featuredInsights.items.map((insight, index) => (
@@ -294,7 +294,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className={`${styles.section} ${styles.ctaSection} ${visible ? styles.fadeIn : ""}`}>
+      <section className={`${styles.ctaSection} ${visible ? styles.fadeIn : ""}`}>
         <h2 className={styles.ctaTitle}>Ready to Understand Your Food Better?</h2>
         <div className={styles.ctaButtons}>
           <Link href="/upload">
