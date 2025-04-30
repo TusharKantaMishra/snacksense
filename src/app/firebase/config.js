@@ -1,40 +1,23 @@
-// Import the functions you need from the Firebase SDKs
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from "firebase/firestore";
+/**
+ * @deprecated This file is maintained for backward compatibility only.
+ * Please import from src/lib/firebase.ts directly instead.
+ * 
+ * This file now forwards to the centralized Firebase configuration in src/lib/firebase.ts
+ * to ensure all Firebase usage in the app uses the same configuration.
+ */
 
-// Firebase configuration using Next.js environment variables
-const firebaseConfig = {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "dummy-api-key-for-build",
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "dummy-auth-domain.firebaseapp.com",
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "snacksense-demo",
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "dummy-storage-bucket.appspot.com",
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "123456789012",
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789012:web:abcdef1234567890",
-    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID // Optional, only if using Analytics
-};
+import { firebaseApp, auth, db } from '../../lib/firebase';
 
-// Create mock objects for SSR
-const mockApp = {};
-const mockAuth = {};
-const mockDb = {};
+// Forward the app as 'app' for backward compatibility
+const app = firebaseApp;
 
-// Initialize Firebase only in browser environment to avoid SSR issues
-let app = mockApp;
-let auth = mockAuth;
-let db = mockDb;
-
-// Only initialize Firebase if we're in a browser environment
-if (typeof window !== 'undefined') {
-    try {
-        app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-        auth = getAuth(app);
-        db = getFirestore(app);
-        console.log("Firebase initialized successfully in browser");
-    } catch (error) {
-        console.error("Firebase initialization error:", error);
-        // Keep using the mock instances for build process
-    }
-}
-
+// Export our Firebase services from the centralized configuration
 export { app, auth, db };
+
+// Log a warning in development mode about using the deprecated file
+if (process.env.NODE_ENV === 'development') {
+  console.warn(
+    'WARNING: Using deprecated Firebase configuration from src/app/firebase/config.js. ' +
+    'Please update your imports to use src/lib/firebase.ts instead.'
+  );
+}

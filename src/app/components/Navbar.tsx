@@ -13,7 +13,14 @@ export default function Navbar() {
       <nav className="navbar">
         {/* Logo & Site Name */}
         <Link href="/">
-          <Image src="/images/logo.png" alt="SnackSense Logo" className="site-logo" width={50} height={50} />
+          <Image 
+            src="/images/logo.png" 
+            alt="SnackSense Logo" 
+            className="site-logo" 
+            width={50} 
+            height={50} 
+            priority={true} 
+          />
         </Link>
 
         {/* Desktop Links */}

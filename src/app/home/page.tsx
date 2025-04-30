@@ -204,30 +204,31 @@ export default function Home() {
         </Link>
       </section>
 
-      {/* How It Works Section */}
+      {/* How SnackSense Works Section */}
       <section className={`${styles.howItWorksSection} ${visible ? styles.fadeIn : ""}`}>
         <h2 className={styles.sectionTitle}>{displayContent.howItWorks.title}</h2>
         <div className={styles.stepsContainer}>
-          {displayContent.howItWorks.steps.map((step, index) => (
-            <div key={index} className={styles.stepCard}>
-              <div className={styles.stepNumber}>{index + 1}</div>
-              <h3 className={styles.stepTitle}>{step.step}</h3>
-              <p className={styles.stepDescription}>{step.desc}</p>
-            </div>
-          ))}
+            {displayContent.howItWorks.steps.map((step, index) => (
+              <div key={index} className={styles.stepCard}>
+                <div className={styles.stepNumber}>{index + 1}</div>
+                <h3 className={styles.stepTitle}>{step.step}</h3>
+                <p className={styles.stepDescription}>{step.desc}</p>
+              </div>
+            ))}
         </div>
       </section>
 
-      {/* Benefits Section */}
+      {/* Benefits of Using SnackSense Section */}
       <section className={`${styles.benefitsSection} ${visible ? styles.fadeIn : ""}`}>
         <h2 className={styles.sectionTitle}>{displayContent.benefits.title}</h2>
         <div className={styles.benefitsContainer}>
-          {displayContent.benefits.items.map((benefit, index) => (
-            <div key={index} className={styles.benefitCard}>
-              <h3 className={styles.benefitTitle}>{benefit.title}</h3>
-              <p className={styles.benefitText}>{benefit.text}</p>
-            </div>
-          ))}
+            {displayContent.benefits.items.map((benefit, index) => (
+              <div key={index} className={styles.benefitCard}>
+                <div className={styles.benefitIcon}></div>
+                <h3 className={styles.benefitTitle}>{benefit.title}</h3>
+                <p className={styles.benefitText}>{benefit.text}</p>
+              </div>
+            ))}
         </div>
       </section>
 

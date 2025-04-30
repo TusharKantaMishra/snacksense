@@ -1,0 +1,143 @@
+/* Responsive Navigation Styles */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 5%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  transition: all 0.3s ease;
+  background: rgba(15, 15, 30, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.navbarScrolled {
+  background: rgba(15, 15, 30, 0.8);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.navLogo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logoImage {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.logoText {
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #00eaff, #a955ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.navLinks {
+  display: flex;
+  gap: 2rem;
+}
+
+.navLink {
+  color: #fff;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  position: relative;
+  text-decoration: none;
+}
+
+.navLink:hover {
+  opacity: 1;
+  color: #00eaff;
+}
+
+.navLink::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #00eaff, #a955ff);
+  transition: width 0.3s ease;
+}
+
+.navLink:hover::after {
+  width: 100%;
+}
+
+.mobileMenuBtn {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.mobileMenu {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 80%;
+  max-width: 300px;
+  height: 100vh;
+  background: rgba(15, 15, 30, 0.95);
+  backdrop-filter: blur(15px);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  padding: 5rem 2rem;
+  transition: right 0.3s ease;
+  box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.mobileMenu.open {
+  right: 0;
+}
+
+.mobileCloseBtn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.mobileNavLink {
+  color: white;
+  font-size: 1.2rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.mobileNavLink:hover {
+  color: #00eaff;
+  padding-left: 0.5rem;
+}
+
+/* Media Queries for Responsive Navigation */
+@media (max-width: 768px) {
+  .navLinks {
+    display: none;
+  }
+  
+  .mobileMenuBtn {
+    display: block;
+  }
+  
+  .navbar {
+    padding: 0.75rem 5%;
+  }
+}

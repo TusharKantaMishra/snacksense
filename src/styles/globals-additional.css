@@ -1,0 +1,5 @@
+/* Global styles that CSS modules can't handle */
+section > * {
+  position: relative;
+  z-index: 1;
+}

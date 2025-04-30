@@ -1,0 +1,96 @@
+/* Global styles for home page */
+
+/* Base styles */
+.bg-darkBlue {
+  background-color: #0a1929;
+}
+
+.text-gold {
+  color: #ffd700;
+}
+
+.text-softOrange {
+  color: #ff9d5c;
+}
+
+/* Hero section styling */
+.site-title {
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Button styling */
+.elegant-button {
+  background: linear-gradient(45deg, #ffd700, #ff9d5c);
+  color: #0a1929;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.elegant-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 20px rgba(255, 215, 0, 0.4);
+}
+
+/* Glass card styling */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 24px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+.delay-0 { animation-delay: 0.3s; }
+.delay-1 { animation-delay: 0.6s; }
+.delay-2 { animation-delay: 0.9s; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* How it works section specific styling */
+.step-number {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #ffd700;
+}
+
+.step-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.step-description {
+  color: #e0e0e0;
+}
+
+/* Benefits section styling */
+.benefit-icon {
+  font-size: 2rem;
+  margin-bottom: 16px;
+  color: #ff9d5c;
+}
+
+.benefit-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #ffffff;
+}

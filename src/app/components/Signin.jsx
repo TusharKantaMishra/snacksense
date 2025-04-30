@@ -1,21 +1,23 @@
 "use client";
 
 import React, { useState } from 'react';
-import { User, Lock, Cpu } from 'lucide-react';
+import { User, Lock } from 'lucide-react';
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { auth } from '../firebase/config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import Image from "next/image";
 import '../../styles/signin.css'; // Importing external CSS
 import image from '../../../public/images/cropped-logo.png'; // Importing image
+import { auth } from '../../lib/firebase'; // Import auth from centralized Firebase config
 
 function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  
+  // No need for useEffect to initialize Firebase - we're using the centralized configuration
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -27,6 +29,9 @@ function SignIn() {
       setLoading(false);
       return;
     }
+
+    // No need to check if auth is initialized or validate Firebase config
+    // since we're using the centralized Firebase auth service
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -55,8 +60,11 @@ function SignIn() {
         case 'auth/network-request-failed':
           setError('Network error. Please check your connection.');
           break;
+        case 'auth/api-key-not-valid':
+          setError('Invalid Firebase API key. Please check your environment configuration.');
+          break;
         default:
-          setError('An error occurred. Please try again.');
+          setError(`Authentication error: ${err.message || 'Unknown error'}`);
       }
     }
   };
