@@ -1,0 +1,44 @@
+water
+sugar
+coconut water
+coconut milk
+coconut cream
+sodium
+potassium
+fiber
+vitamin
+mineral
+protein
+fat
+saturated fat
+trans fat
+cholesterol
+carbohydrate
+sugar
+fiber
+sodium
+potassium
+vitamin a
+vitamin c
+calcium
+iron
+allergens
+contains
+may contain
+trace amounts
+processed in a facility
+manufactured on shared equipment
+wheat
+soy
+milk
+dairy
+tree nuts
+peanuts
+sesame
+shellfish
+fish
+celery
+mustard
+sulphites
+lupin
+molluscs

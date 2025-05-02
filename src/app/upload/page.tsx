@@ -30,7 +30,23 @@ interface IngredientAnalysis {
   scientificEvidence?: {
     level: string;
   };
+  quantity?: string;
   sustainabilityScore?: number;
+}
+
+// Interface for product summary
+interface ProductSummary {
+  overallRating: 'Good' | 'Neutral' | 'Bad';
+  summary: string;
+  healthScore: number;
+  recommendations: string[];
+}
+
+// Interface for the API response
+interface AnalysisResponse {
+  ingredients: IngredientAnalysis[];
+  nutritionalInfo: Record<string, string>;
+  productSummary: ProductSummary;
 }
 
 // Type definition for window with environment variables
@@ -53,12 +69,6 @@ const getGeminiApiKey = (): string | null => {
     console.log('NEXT_PUBLIC_GEMINI_API_KEY not found or empty');
   }
   
-  // Then try the non-public version (shouldn't work in browser but worth checking)
-  const privateKey = process.env.GEMINI_API_KEY;
-  if (privateKey) {
-    console.log('Found key in GEMINI_API_KEY, length:', privateKey.length);
-    return privateKey;
-  }
   
   // Then try the injected runtime variable if in browser context
   if (typeof window !== 'undefined') {
@@ -77,6 +87,133 @@ const getGeminiApiKey = (): string | null => {
   return 'AIzaSyCv3Ribc8-9bI0ZU_tBq5gL7KZqRB4z08M';
 };
 
+// Component for rendering a nutrition facts table
+const NutritionFactsTable = ({ nutritionalInfo }: { nutritionalInfo: Record<string, string> }) => {
+  // Group nutrients by categories
+  const macronutrients = [
+    { key: 'totalFat', label: 'Total Fat' },
+    { key: 'saturatedFat', label: 'Saturated Fat', indent: true },
+    { key: 'transFat', label: 'Trans Fat', indent: true },
+    { key: 'cholesterol', label: 'Cholesterol' },
+    { key: 'sodium', label: 'Sodium' },
+    { key: 'totalCarbohydrates', label: 'Total Carbohydrates' },
+    { key: 'dietaryFiber', label: 'Dietary Fiber', indent: true },
+    { key: 'sugars', label: 'Sugars', indent: true },
+    { key: 'addedSugars', label: 'Added Sugars', indent: true },
+    { key: 'protein', label: 'Protein' }
+  ];
+
+  const vitaminsAndMinerals = [
+    { key: 'vitaminD', label: 'Vitamin D' },
+    { key: 'calcium', label: 'Calcium' },
+    { key: 'iron', label: 'Iron' },
+    { key: 'potassium', label: 'Potassium' },
+    { key: 'vitaminA', label: 'Vitamin A' },
+    { key: 'vitaminC', label: 'Vitamin C' },
+    { key: 'vitaminB6', label: 'Vitamin B6' },
+    { key: 'vitaminB12', label: 'Vitamin B12' },
+    { key: 'thiamin', label: 'Thiamin' },
+    { key: 'riboflavin', label: 'Riboflavin' },
+    { key: 'niacin', label: 'Niacin' },
+    { key: 'folate', label: 'Folate' },
+    { key: 'biotin', label: 'Biotin' },
+    { key: 'pantothenicAcid', label: 'Pantothenic Acid' },
+    { key: 'phosphorus', label: 'Phosphorus' },
+    { key: 'iodine', label: 'Iodine' },
+    { key: 'magnesium', label: 'Magnesium' },
+    { key: 'zinc', label: 'Zinc' },
+    { key: 'selenium', label: 'Selenium' },
+    { key: 'copper', label: 'Copper' },
+    { key: 'manganese', label: 'Manganese' },
+    { key: 'chromium', label: 'Chromium' },
+    { key: 'molybdenum', label: 'Molybdenum' }
+  ];
+
+  // Filter to only show nutrients that are present in the nutritionalInfo
+  const availableMacronutrients = macronutrients.filter(item => nutritionalInfo[item.key]);
+  const availableVitaminsAndMinerals = vitaminsAndMinerals.filter(item => nutritionalInfo[item.key]);
+
+  // If we don't have enough nutritional info, don't display the table
+  if (Object.keys(nutritionalInfo).length < 3) {
+    return null;
+  }
+
+  return (
+    <div className="nutrition-facts-table bg-white text-black p-4 rounded-lg shadow-md max-w-md mx-auto">
+      <div className="text-2xl font-bold border-b-2 border-black pb-1 mb-1">Nutrition Facts</div>
+      
+      {/* Serving information */}
+      {nutritionalInfo.servingSize && (
+        <div className="text-sm pb-1 border-b border-black">
+          <span className="font-semibold">Serving size</span> {nutritionalInfo.servingSize}
+        </div>
+      )}
+      
+      {nutritionalInfo.servingsPerContainer && (
+        <div className="text-sm pb-1 border-b border-black">
+          <span className="font-semibold">Servings per container</span> {nutritionalInfo.servingsPerContainer}
+        </div>
+      )}
+      
+      {/* Calories */}
+      {nutritionalInfo.calories && (
+        <div className="py-2 border-b-4 border-black flex justify-between items-center">
+          <span className="font-bold">Calories</span>
+          <span className="font-bold text-xl">{nutritionalInfo.calories.replace(' Cal', '')}</span>
+        </div>
+      )}
+      
+      {/* Daily Value header */}
+      <div className="text-right text-sm border-b border-black py-1">
+        <span>% Daily Value*</span>
+      </div>
+      
+      {/* Macronutrients */}
+      {availableMacronutrients.map((nutrient) => (
+        <div 
+          key={nutrient.key} 
+          className={`py-1 flex justify-between items-center ${
+            nutrient.key !== 'protein' ? 'border-b border-black' : ''
+          }`}
+        >
+          <span className={`font-${nutrient.indent ? 'normal' : 'semibold'} ${nutrient.indent ? 'pl-4' : ''}`}>
+            {nutrient.label}
+          </span>
+          <span>{nutritionalInfo[nutrient.key]}</span>
+        </div>
+      ))}
+      
+      {/* Vitamins and Minerals */}
+      {availableVitaminsAndMinerals.length > 0 && (
+        <div className="pt-2 border-t-4 border-black">
+          {availableVitaminsAndMinerals.map((nutrient, index) => (
+            <div 
+              key={nutrient.key} 
+              className={`py-1 flex justify-between items-center ${
+                index < availableVitaminsAndMinerals.length - 1 ? 'border-b border-black' : ''
+              }`}
+            >
+              <span className="font-normal">{nutrient.label}</span>
+              <span>{nutritionalInfo[nutrient.key]}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      
+      {/* Daily Value note */}
+      {nutritionalInfo.dailyValueInfo ? (
+        <div className="text-xs mt-4">
+          * {nutritionalInfo.dailyValueInfo}
+        </div>
+      ) : (
+        <div className="text-xs mt-4">
+          * The % Daily Value (DV) tells you how much a nutrient in a serving of food contributes to a daily diet. 2,000 calories a day is used for general nutrition advice.
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function Upload() {
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -87,6 +224,18 @@ export default function Upload() {
   const [showCamera, setShowCamera] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string>('');
   
+  // New state for filtering results
+  const [activeFilter, setActiveFilter] = useState<'All' | 'Good' | 'Neutral' | 'Bad'>('All');
+  const [categorizedResults, setCategorizedResults] = useState<Record<string, IngredientAnalysis[]>>({
+    Good: [],
+    Neutral: [],
+    Bad: []
+  });
+  
+  // New state for nutritional info and product summary
+  const [nutritionalInfo, setNutritionalInfo] = useState<Record<string, string>>({});
+  const [productSummary, setProductSummary] = useState<ProductSummary | null>(null);
+
   // Refs for camera functionality
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -589,7 +738,9 @@ export default function Upload() {
               tessedit_pageseg_mode: PSM.SPARSE_TEXT, // Better for ingredient lists
               tessedit_char_blacklist: '[]{}^~|\\', // Remove problematic symbols often misread in blurry text
               textord_min_linesize: '1.25', // Better for small text
-              textord_heavy_nr: '1' // More aggressive noise removal
+              tessedit_ocr_engine_mode: OEM.LSTM_ONLY, // 3 - Neural nets LSTM engine only
+              tessjs_create_hocr: '0',
+              tessjs_create_tsv: '0',
             });
             
             const blurryResult = await primaryWorker.recognize(imageSource);
@@ -734,8 +885,12 @@ export default function Upload() {
           .replace(/\bD\b/g, '0')
           .replace(/\bG\b/g, '6')
           .replace(/\bS\b/g, '5')
-          .replace(/\bZ\b/g, '2');
-
+          .replace(/\bZ\b/g, '2')
+          // Fix spacing issues between ingredients
+          .replace(/([a-z])\s+,\s+/gi, '$1, ')
+          .replace(/\s{2,}/g, ' ')
+          .trim();
+        
         // Second pass: Fix specific food label terminology and formats
         cleaned = cleaned
           // Common ingredient name corrections
@@ -846,7 +1001,7 @@ export default function Upload() {
           .replace(/ernulsifiers?/gi, 'emulsifier')
           // Common OCR errors with blurry digits and symbols
           .replace(/\b([0-9]),([0-9])\b/g, '$1.$2') // Fix comma used as decimal point
-          .replace(/\b([0-9])\s?\.\s?([0-9])\b/g, '$1.$2') // Fix spaced decimal points
+          .replace(/\b([0-9])\s+\.\s+([0-9])\b/g, '$1.$2') // Fix spaced decimal points
           .replace(/\b([a-z])(\.)([a-z])\b/gi, '$1,$3') // Fix periods that should be commas in lists
           // Handle cases where m, n, and rn are confused
           .replace(/cornstarch/gi, 'cornstarch')
@@ -983,7 +1138,7 @@ export default function Upload() {
       // Analyze ingredients with Gemini using optimized request format
       try {
         // Send the optimized analysis request
-        const analysisResponse = await axios.post('/api/ingredients/analyze', 
+        const analysisResponse = await axios.post<AnalysisResponse>('/api/ingredients/analyze', 
           { 
             text: enhancedAnalysisText,
             productInfo: productInfo, // Still send structured product info for backend processing
@@ -1006,6 +1161,23 @@ export default function Upload() {
         
         console.log(`Successfully analyzed ${analysisResponse.data.length} ingredients`);
         setResults(analysisResponse.data);
+        
+        // Categorize results by health rating
+        const categorized = {
+          Good: analysisResponse.data.filter((item: IngredientAnalysis) => item.healthRating === 'Good'),
+          Neutral: analysisResponse.data.filter((item: IngredientAnalysis) => item.healthRating === 'Neutral'),
+          Bad: analysisResponse.data.filter((item: IngredientAnalysis) => item.healthRating === 'Bad')
+        };
+        setCategorizedResults(categorized);
+        
+        // Set nutritional info and product summary from API response
+        if (analysisResponse.data.nutritionalInfo) {
+          setNutritionalInfo(analysisResponse.data.nutritionalInfo);
+        }
+        if (analysisResponse.data.productSummary) {
+          setProductSummary(analysisResponse.data.productSummary);
+        }
+        
         setProgress(100);
       } catch (error: any) {
         console.error('API request error:', error);
@@ -1040,8 +1212,8 @@ export default function Upload() {
                     <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 text-center">
                       <h3 className="font-bold text-blue-700 mb-2">Using local analysis</h3>
                       <p className="text-blue-600 text-sm">
-                        Due to high demand, we've analyzed your ingredients locally. 
-                        For more detailed analysis, try again later.
+                        We've analyzed your ingredients locally. For more detailed analysis, 
+                        please check your network connection and try again.
                       </p>
                     </div>
                   );
@@ -1099,7 +1271,7 @@ export default function Upload() {
               const localResults = analyzeIngredientsLocally(extractedIngredients);
               
               if (localResults && localResults.length > 0) {
-                console.log('Direct OCR-to-analysis succeeded with', localResults.length, 'ingredients');
+                console.log('Direct OCR-to-analysis succeeded with', localResults.length, 'ingredients analyzed');
                 setResults(localResults);
                 setProgress(100);
                 
@@ -1113,7 +1285,7 @@ export default function Upload() {
                     </p>
                   </div>
                 );
-                return; // Skip showing the network error
+                return; // Skip the error message below
               }
             }
           } catch (localError) {
@@ -1169,6 +1341,25 @@ export default function Upload() {
     }
   };
 
+  // Add a function to filter results based on the active filter
+  const getFilteredResults = () => {
+    if (!results) return [];
+    if (activeFilter === 'All') return results;
+    return results?.filter(result => result.healthRating === activeFilter) || [];
+  };
+  
+  // Get counts for each filter category
+  const getFilterCounts = () => {
+    if (!results) return { All: 0, Good: 0, Neutral: 0, Bad: 0 };
+    
+    return {
+      All: results.length,
+      Good: categorizedResults.Good.length,
+      Neutral: categorizedResults.Neutral.length,
+      Bad: categorizedResults.Bad.length
+    };
+  };
+
   return (
     <div className="page-container max-w-4xl mx-auto p-4">
       {/* Futuristic background elements */}
@@ -1199,6 +1390,36 @@ export default function Upload() {
       <div className="data-particle"></div>
       
       <h1 className="futuristic-heading text-4xl font-bold mb-4 text-white">Upload Food Packaging Image</h1>
+      
+      {/* Instructions for optimal results */}
+      <div className="instructions-panel mb-6 p-4 bg-black bg-opacity-50 border border-cyan-400/30 rounded-lg text-white">
+        <h2 className="text-xl font-semibold mb-2 flex items-center text-cyan-300">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+          Tips for Best Results
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h3 className="text-lg font-medium mb-1 text-cyan-200">Image Quality:</h3>
+            <ul className="list-disc pl-5 space-y-1 text-sm">
+              <li>Take a clear, well-lit photo without glare or shadows</li>
+              <li>Hold the camera steady to avoid blurry images</li>
+              <li>Position the camera perpendicular to the label</li>
+              <li>Make sure the text is in focus and readable</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-lg font-medium mb-1 text-cyan-200">What to Include:</h3>
+            <ul className="list-disc pl-5 space-y-1 text-sm">
+              <li>Capture both the ingredients list and nutrition facts table</li>
+              <li>Ensure the entire text is visible and not cut off</li>
+              <li>For best results, avoid highly reflective packaging</li>
+              <li>Include any allergen or dietary information when possible</li>
+            </ul>
+          </div>
+        </div>
+      </div>
       
       {/* Camera UI when active */}
       {showCamera && (
@@ -1365,7 +1586,7 @@ export default function Upload() {
             >
               {loading ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
@@ -1425,74 +1646,255 @@ export default function Upload() {
         <div className="mb-6 p-6 border rounded-lg shadow-sm bg-black bg-opacity-70 border-cyan-400/30 glow-border">
           <h2 className="text-xl font-semibold mb-6 text-white">Ingredient Analysis Results</h2>
           
-          <div className="space-y-6">
-            {results.map((result, index) => {
+          {/* Product Summary Card - displayed at the top */}
+          {productSummary && (
+            <div className={`product-summary-card mb-8 p-6 rounded-lg shadow-lg border ${
+              productSummary.overallRating === 'Good' 
+                ? 'border-green-500 bg-green-900 bg-opacity-90' 
+                : productSummary.overallRating === 'Bad' 
+                  ? 'border-red-500 bg-red-900 bg-opacity-90'
+                  : 'border-yellow-500 bg-yellow-900 bg-opacity-90'
+            }`}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-white">Overall Analysis</h3>
+                <span className={`px-4 py-1 rounded-full text-sm font-bold ${
+                  productSummary.overallRating === 'Good' 
+                    ? 'bg-green-500 text-white' 
+                    : productSummary.overallRating === 'Bad' 
+                      ? 'bg-red-500 text-white'
+                      : 'bg-yellow-500 text-white'
+                }`}>
+                  {productSummary.overallRating}
+                </span>
+              </div>
+              
+              <div className="health-score-meter mb-4">
+                <div className="flex justify-between text-xs text-white mb-1">
+                  <span>Unhealthy</span>
+                  <span>Health Score: {productSummary.healthScore}/100</span>
+                  <span>Very Healthy</span>
+                </div>
+                <div className="w-full bg-gray-300 rounded-full h-4 overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full ${
+                      productSummary.healthScore >= 70 ? 'bg-green-500' :
+                      productSummary.healthScore >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                    }`}
+                    style={{ width: `${productSummary.healthScore}%` }}
+                  />
+                </div>
+              </div>
+              
+              <p className="text-white mb-4">{productSummary.summary}</p>
+              
+              {/* Nutrition Facts Table */}
+              {Object.keys(nutritionalInfo).length > 0 && (
+                <div className="nutritional-highlights mb-6">
+                  <h4 className="text-lg font-semibold text-white mb-3">Nutritional Information</h4>
+                  <div className="bg-white bg-opacity-10 p-4 rounded-lg">
+                    {/* Simple highlights for quick view */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+                      {nutritionalInfo.calories && (
+                        <div className="bg-black bg-opacity-30 rounded p-2 text-center">
+                          <div className="text-white font-bold">{nutritionalInfo.calories}</div>
+                          <div className="text-white text-xs">Calories</div>
+                        </div>
+                      )}
+                      {nutritionalInfo.protein && (
+                        <div className="bg-black bg-opacity-30 rounded p-2 text-center">
+                          <div className="text-white font-bold">{nutritionalInfo.protein}</div>
+                          <div className="text-white text-xs">Protein</div>
+                        </div>
+                      )}
+                      {(nutritionalInfo.totalCarbohydrates || nutritionalInfo.carbohydrates) && (
+                        <div className="bg-black bg-opacity-30 rounded p-2 text-center">
+                          <div className="text-white font-bold">{nutritionalInfo.totalCarbohydrates || nutritionalInfo.carbohydrates}</div>
+                          <div className="text-white text-xs">Carbs</div>
+                        </div>
+                      )}
+                      {nutritionalInfo.totalFat && (
+                        <div className="bg-black bg-opacity-30 rounded p-2 text-center">
+                          <div className="text-white font-bold">{nutritionalInfo.totalFat}</div>
+                          <div className="text-white text-xs">Fat</div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Expandable detailed nutrition facts table */}
+                    <div className="nutrition-facts-details mt-3">
+                      <button 
+                        className="view-details-btn bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg w-full flex items-center justify-center mb-3"
+                        onClick={() => {
+                          const detailsElement = document.getElementById('nutrition-facts-details');
+                          if (detailsElement) {
+                            detailsElement.classList.toggle('hidden');
+                          }
+                        }}
+                      >
+                        <span className="mr-2">View Full Nutrition Facts</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                      
+                      <div id="nutrition-facts-details" className="hidden">
+                        <NutritionFactsTable nutritionalInfo={nutritionalInfo} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Recommendations */}
+              {productSummary.recommendations.length > 0 && (
+                <div className="recommendations">
+                  <h4 className="text-lg font-semibold text-white mb-2">Recommendations</h4>
+                  <ul className="list-disc pl-5">
+                    {productSummary.recommendations.map((rec, index) => (
+                      <li key={index} className="text-white">{rec}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Filter controls */}
+          <div className="filter-controls mb-6">
+            <div className="filter-label mb-2 text-gray-700">Filter ingredients by health rating:</div>
+            <div className="flex space-x-2">
+              <button
+                className={`px-4 py-2 rounded-md ${activeFilter === 'All' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'} font-medium flex items-center`}
+                onClick={() => setActiveFilter('All')}
+              >
+                All <span className={`ml-2 px-2 py-0.5 text-xs rounded-full bg-opacity-80 ${activeFilter === 'All' ? 'bg-white text-blue-600' : 'bg-gray-500 text-white'}`}>{results.length}</span>
+              </button>
+              <button
+                className={`px-4 py-2 rounded-md ${activeFilter === 'Good' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'} font-medium flex items-center`}
+                onClick={() => setActiveFilter('Good')}
+              >
+                Good <span className={`ml-2 px-2 py-0.5 text-xs rounded-full bg-opacity-80 ${activeFilter === 'Good' ? 'bg-white text-green-600' : 'bg-gray-500 text-white'}`}>{categorizedResults.Good.length}</span>
+              </button>
+              <button
+                className={`px-4 py-2 rounded-md ${activeFilter === 'Neutral' ? 'bg-yellow-600 text-white' : 'bg-gray-200 text-gray-700'} font-medium flex items-center`}
+                onClick={() => setActiveFilter('Neutral')}
+              >
+                Neutral <span className={`ml-2 px-2 py-0.5 text-xs rounded-full bg-opacity-80 ${activeFilter === 'Neutral' ? 'bg-white text-yellow-600' : 'bg-gray-500 text-white'}`}>{categorizedResults.Neutral.length}</span>
+              </button>
+              <button
+                className={`px-4 py-2 rounded-md ${activeFilter === 'Bad' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'} font-medium flex items-center`}
+                onClick={() => setActiveFilter('Bad')}
+              >
+                Bad <span className={`ml-2 px-2 py-0.5 text-xs rounded-full bg-opacity-80 ${activeFilter === 'Bad' ? 'bg-white text-red-600' : 'bg-gray-500 text-white'}`}>{categorizedResults.Bad.length}</span>
+              </button>
+            </div>
+          </div>
+          
+          {/* Show summary of health ratings */}
+          <div className="health-summary mb-6">
+            <div className="health-summary-title text-lg font-semibold mb-2 text-white">Health Rating Summary</div>
+            <div className="health-bars flex items-center h-6 rounded-lg overflow-hidden bg-gray-200 w-full">
+              {categorizedResults.Good.length > 0 && (
+                <div 
+                  className="bg-green-500 h-full" 
+                  style={{ width: `${(categorizedResults.Good.length / (results.length || 1)) * 100}%` }}
+                  title={`${categorizedResults.Good.length} Good ingredients`}
+                />
+              )}
+              {categorizedResults.Neutral.length > 0 && (
+                <div 
+                  className="bg-yellow-500 h-full" 
+                  style={{ width: `${(categorizedResults.Neutral.length / (results.length || 1)) * 100}%` }}
+                  title={`${categorizedResults.Neutral.length} Neutral ingredients`}
+                />
+              )}
+              {categorizedResults.Bad.length > 0 && (
+                <div 
+                  className="bg-red-500 h-full" 
+                  style={{ width: `${(categorizedResults.Bad.length / (results.length || 1)) * 100}%` }}
+                  title={`${categorizedResults.Bad.length} Bad ingredients`}
+                />
+              )}
+            </div>
+            <div className="summary-legend flex justify-between text-sm mt-1 text-white">
+              <div>Good: {categorizedResults.Good.length}</div>
+              <div>Neutral: {categorizedResults.Neutral.length}</div>
+              <div>Bad: {categorizedResults.Bad.length}</div>
+            </div>
+          </div>
+          
+          {/* Render filtered results in a single column instead of grid */}
+          <div className="ingredients-list space-y-4 max-w-2xl mx-auto">
+            {getFilteredResults().map((result, index) => {
               // Extract any potential details from the explanation
               const detailsMatch = result.explanation?.match(/Details:(.+?)(?=\.|$)/s);
               const details = detailsMatch ? 
-                detailsMatch[1].split(/[•·\-*]/).filter(d => d.trim().length > 0).map(d => d.trim()) : 
-                [];
-              
-              // Look for alternatives in the explanation
-              const alternativesMatch = result.explanation?.match(/Alternatives?:(.+?)(?=\.|$)/s);
-              const alternatives = alternativesMatch ? alternativesMatch[1].trim() : '';
+                detailsMatch[1].trim().split(/\s*,\s*|\s*;\s*|\s*•\s*/).map(d => d.trim()).filter(Boolean)
+                : result.details || [];
               
               return (
-                <div 
-                  key={index} 
-                  className="analysis-result-card p-4 rounded-lg border border-cyan-400/30 bg-gradient-to-r from-[#0f3460]/50 to-[#533483]/50 backdrop-blur transition-all"
+                <div
+                  key={index}
+                  className={`ingredient-card p-5 rounded-lg shadow-md border-l-4 ${
+                    result.healthRating === 'Good'
+                      ? 'border-l-green-500 bg-green-50'
+                      : result.healthRating === 'Bad'
+                      ? 'border-l-red-500 bg-red-50'
+                      : result.healthRating === 'Neutral'
+                      ? 'border-l-yellow-500 bg-yellow-50'
+                      : 'bg-blue-600 text-white'
+                  }`}
                 >
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3">
-                    <h3 className="ingredient-name">{result.ingredient}</h3>
-                    <div 
-                      className={`mt-2 md:mt-0 px-3 py-1 rounded-full text-sm font-medium health-rating-badge ${
-                        result.healthRating === 'Good' ? 'health-rating-good' : 
-                        result.healthRating === 'Neutral' ? 'health-rating-neutral' : 
-                        'health-rating-bad'
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-bold">{result.ingredient}</h3>
+                    <span
+                      className={`health-rating px-3 py-1 rounded-full text-sm font-bold ${
+                        result.healthRating === 'Good'
+                          ? 'bg-green-100 text-green-800'
+                          : result.healthRating === 'Bad'
+                          ? 'bg-red-100 text-red-800'
+                          : result.healthRating === 'Neutral'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-blue-600 text-white'
                       }`}
                     >
                       {result.healthRating}
-                    </div>
+                    </span>
                   </div>
                   
-                  <div className="mb-4">
-                    <p className="section-title">Health Impact</p>
-                    <p className="section-content">{result.explanation}</p>
-                  </div>
+                  {result.explanation && (
+                    <p className="mt-2 text-gray-700">{result.explanation}</p>
+                  )}
                   
                   {details.length > 0 && (
-                    <div className="mb-4">
-                      <p className="section-title">Details</p>
-                      <ul className="details-list">
+                    <div className="mt-3">
+                      <h4 className="font-medium text-gray-800">Details</h4>
+                      <ul className="list-disc pl-5 mt-1 text-gray-700 space-y-1">
                         {details.map((detail, i) => (
-                          <li key={i} className="ml-5 list-disc">{detail}</li>
+                          <li key={i}>{detail}</li>
                         ))}
                       </ul>
                     </div>
                   )}
                   
-                  {alternatives && (
-                    <div className="mb-4">
-                      <p className="section-title">Healthier Alternatives</p>
-                      <p className="section-content">{alternatives}</p>
-                    </div>
-                  )}
-                  
                   {result.healthScore !== undefined && (
-                    <div className="health-score">
-                      <div className="score-bar">
-                        <div 
-                          className={`score-indicator width-${Math.round(result.healthScore)}`}
-                        />
-                      </div>
-                      <span>{result.healthScore}/100</span>
+                    <div className="mt-3">
+                      <span className="font-medium text-gray-800">Health Score: </span>
+                      <span>{result.healthScore}/10</span>
                     </div>
                   )}
                   
-                  {result.nutritionalInfo && Object.keys(result.nutritionalInfo).length > 0 && (
-                    <div className="info-section">
-                      <h4>Nutritional Information</h4>
-                      <ul className="nutrition-list">
+                  {result.alternatives && result.alternatives.length > 0 && (
+                    <div className="mt-3">
+                      <h4 className="font-medium text-gray-800">Healthier Alternatives</h4>
+                      <p className="text-gray-700">{result.alternatives.join(', ')}</p>
+                    </div>
+                  )}
+                  
+                  {result.nutritionalInfo && (
+                    <div className="mt-3">
+                      <h4 className="font-medium text-gray-800 mb-1">Nutritional Info</h4>
+                      <ul className="text-gray-700 space-y-1">
                         {result.nutritionalInfo.calories && (
                           <li><strong>Calories:</strong> {result.nutritionalInfo.calories}</li>
                         )}
@@ -1505,22 +1907,16 @@ export default function Upload() {
                         {result.nutritionalInfo.fats && (
                           <li><strong>Fats:</strong> {result.nutritionalInfo.fats}</li>
                         )}
-                        {result.nutritionalInfo.vitamins && result.nutritionalInfo.vitamins.length > 0 && (
-                          <li><strong>Vitamins:</strong> {result.nutritionalInfo.vitamins.join(', ')}</li>
-                        )}
-                        {result.nutritionalInfo.minerals && result.nutritionalInfo.minerals.length > 0 && (
-                          <li><strong>Minerals:</strong> {result.nutritionalInfo.minerals.join(', ')}</li>
-                        )}
                       </ul>
                     </div>
                   )}
                   
                   {((result.benefits?.length ?? 0) > 0 || (result.riskFactors?.length ?? 0) > 0) && (
-                    <div className="benefits-risks-container">
+                    <div className="benefits-risks-container mt-3">
                       {result.benefits && result.benefits.length > 0 && (
                         <div className="benefits-section">
-                          <h5>Benefits</h5>
-                          <ul className="benefits-list">
+                          <h5 className="font-medium text-gray-800">Benefits</h5>
+                          <ul className="list-disc pl-5 mt-1 text-gray-700 space-y-1">
                             {result.benefits.map((benefit, i) => (
                               <li key={i}>{benefit}</li>
                             ))}
@@ -1529,36 +1925,15 @@ export default function Upload() {
                       )}
                       
                       {result.riskFactors && result.riskFactors.length > 0 && (
-                        <div className="risks-section">
-                          <h5>Risk Factors</h5>
-                          <ul className="risks-list">
+                        <div className="risks-section mt-2">
+                          <h5 className="font-medium text-gray-800">Risk Factors</h5>
+                          <ul className="list-disc pl-5 mt-1 text-gray-700 space-y-1">
                             {result.riskFactors.map((risk, i) => (
                               <li key={i}>{risk}</li>
                             ))}
                           </ul>
                         </div>
                       )}
-                    </div>
-                  )}
-                  
-                  {result.processingLevel && (
-                    <div className="mt-4">
-                      <p className="section-title">Processing Level</p>
-                      <p className="section-content">{result.processingLevel}</p>
-                    </div>
-                  )}
-                  
-                  {result.allergenRisk && (
-                    <div className="mt-4">
-                      <p className="section-title">Allergen Risk</p>
-                      <p className="section-content">{result.allergenRisk}</p>
-                    </div>
-                  )}
-                  
-                  {result.scientificEvidence && (
-                    <div className="mt-4">
-                      <p className="section-title">Scientific Evidence</p>
-                      <p className="section-content">{result.scientificEvidence.level}</p>
                     </div>
                   )}
                 </div>
@@ -1583,8 +1958,17 @@ export default function Upload() {
               className="analyze-another-button px-8 py-3 text-white rounded-full font-medium flex items-center"
               aria-label="Analyze another food product"
             >
-              <svg className="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="mr-2 h-5 w-5" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor"
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2}
+              >
+                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
               Analyze Another Food
             </button>
