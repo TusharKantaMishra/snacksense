@@ -33,4 +33,5 @@ export function loadEnvFile() {
 }
 
 // Export as a named export instead of CommonJS
-export default { loadEnvFile };
+const envUtils = { loadEnvFile };
+export default envUtils;

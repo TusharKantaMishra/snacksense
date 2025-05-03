@@ -1,5 +1,4 @@
 import express from 'express';
-import type { Request, Response } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const router = express.Router();
@@ -276,7 +275,7 @@ interface AnalyzeRequestBody {
 }
 
 // POST /api/ingredients/analyze
-router.post('/', async (req: Request, res: any) => {
+router.post('/', async (req: any, res: any) => {
   console.log('📥 Received request to /api/ingredients/analyze');
   const requestStart = Date.now();
   

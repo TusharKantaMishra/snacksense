@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import path from 'path';
@@ -82,7 +82,7 @@ app.use('/api/about', aboutRoutes);
 app.use('/api/ingredients', ingredientsRoutes);
 
 // Text extraction endpoint
-app.post('/api/extract-text', async (req: Request, res: Response) => {
+app.post('/api/extract-text', async (req: any, res: any) => {
   try {
     // Parse the incoming form data
     const form = new IncomingForm({ keepExtensions: true });
