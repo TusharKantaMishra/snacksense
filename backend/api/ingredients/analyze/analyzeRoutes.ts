@@ -272,6 +272,7 @@ async function analyzeIngredients(text: string, productInfo?: ProductInfo): Prom
 interface AnalyzeRequestBody {
   text: string;
   productInfo?: ProductInfo;
+  requestVersion?: number; // Version of the request format (e.g., 2 for enhanced format)
 }
 
 // POST /api/ingredients/analyze
@@ -280,8 +281,11 @@ router.post('/', async (req: Request, res: Response) => {
   const requestStart = Date.now();
   
   try {
+    // Type assertion for req.body right at the beginning
+    const body = req.body as Partial<AnalyzeRequestBody>;
+    
     // Check if this is an enhanced format request
-    const isEnhancedFormat = ((req.headers as any)['x-request-format'] === 'enhanced') || req.body?.requestVersion === 2;
+    const isEnhancedFormat = ((req.headers as any)['x-request-format'] === 'enhanced') || body?.requestVersion === 2;
     if (isEnhancedFormat) {
       console.log('Enhanced request format detected');
     }
@@ -299,14 +303,13 @@ router.post('/', async (req: Request, res: Response) => {
     
     // Log request body for debugging (without sensitive data)
     console.log('Request body received:', {
-      hasText: !!req.body?.text,
-      textLength: req.body?.text?.length || 0,
-      hasProductInfo: !!req.body?.productInfo,
+      hasText: !!body?.text,
+      textLength: body?.text?.length || 0,
+      hasProductInfo: !!body?.productInfo,
       isEnhancedFormat
     });
     
-    // Explicitly type the request body
-    const body = req.body as AnalyzeRequestBody;
+    // Extract validated data from the request body
     const text = body.text;
     const productInfo = body.productInfo;
 
