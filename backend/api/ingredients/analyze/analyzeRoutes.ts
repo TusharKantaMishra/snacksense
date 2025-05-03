@@ -276,7 +276,7 @@ interface AnalyzeRequestBody {
 }
 
 // POST /api/ingredients/analyze
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: any) => {
   console.log('📥 Received request to /api/ingredients/analyze');
   const requestStart = Date.now();
   
