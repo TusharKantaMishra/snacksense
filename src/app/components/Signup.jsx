@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { User, Lock } from 'lucide-react';
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import { getApps, initializeApp } from 'firebase/app';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import Image from 'next/image';
 import '../../styles/signup.css';
 import image from '../../../public/images/cropped-logo.png';
-import firebaseConfig from '../firebase/configValues';
+import { auth, db } from '../../lib/firebase'; // Import auth and db from centralized Firebase config
 
 function Signup() {
   const [name, setName] = useState('');
@@ -18,43 +17,14 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [auth, setAuth] = useState(null);
-  const [db, setDb] = useState(null);
   const router = useRouter();
   
-  // Initialize Firebase when component mounts
-  useEffect(() => {
-    const initializeFirebase = async () => {
-      try {
-        // Only initialize if not already initialized
-        let app;
-        if (!getApps().length) {
-          app = initializeApp(firebaseConfig);
-        } else {
-          app = getApps()[0];
-        }
-        
-        const authInstance = getAuth(app);
-        const dbInstance = getFirestore(app);
-        setAuth(authInstance);
-        setDb(dbInstance);
-        console.log('Firebase Auth and Firestore initialized in Signup component');
-      } catch (error) {
-        console.error('Error initializing Firebase in Signup:', error);
-        setError('Failed to initialize authentication. Please try again later.');
-      }
-    };
-
-    // Only run in browser
-    if (typeof window !== 'undefined') {
-      initializeFirebase();
-    }
-  }, []);
+  // No need for useEffect to initialize Firebase - we're using the centralized configuration
 
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    setLoading(true); // Start loading
 
     if (!name || !email || !password) {
       setError('Name, email and password are required');
@@ -62,13 +32,7 @@ function Signup() {
       return;
     }
 
-    // Check if auth and db objects are initialized
-    if (!auth || !db) {
-      setLoading(false);
-      setError('Authentication service is initializing. Please try again in a moment.');
-      console.log('Auth or DB object not yet initialized');
-      return;
-    }
+    // No need to check if auth and db are initialized - using centralized config
 
     try {
       // Create user with email and password
@@ -76,7 +40,6 @@ function Signup() {
       const user = userCredential.user;
       
       // Store additional user data (name) in Firestore
-      // Use the db instance we already have in state
       await setDoc(doc(db, "users", user.uid), {
         name: name,
         email: email,
@@ -87,10 +50,32 @@ function Signup() {
       setName('');
       setEmail('');
       setPassword('');
+      setLoading(false);
       router.push('/'); // Redirect to homepage
     } catch (err) {
+      setLoading(false);
       console.error("Registration error:", err);
-      setError(err.message || 'An error occurred during registration');
+      
+      // Handle specific Firebase Authentication errors
+      switch (err.code) {
+        case 'auth/email-already-in-use':
+          setError('Email is already in use.');
+          break;
+        case 'auth/invalid-email':
+          setError('Invalid email format.');
+          break;
+        case 'auth/weak-password':
+          setError('Password is too weak. It should be at least 6 characters.');
+          break;
+        case 'auth/network-request-failed':
+          setError('Network error. Please check your connection.');
+          break;
+        case 'auth/api-key-not-valid':
+          setError('Invalid Firebase API key. Please check your environment configuration.');
+          break;
+        default:
+          setError(`Registration error: ${err.message || 'Unknown error'}`);
+      }
     }
   };
 
@@ -150,7 +135,9 @@ function Signup() {
                 required
               />
             </div>
-            <button type="submit" className="register-button">Sign Up</button>
+            <button type="submit" className="register-button" disabled={loading}>
+              {loading ? "Signing up..." : "Sign Up"}
+            </button>
           </form>
           <div className="redirect-text">
             <Link href="/" className="login-link">Sign In Instead</Link>
