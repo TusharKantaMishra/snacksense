@@ -1,10 +1,5 @@
-import express, { Request as ExpressRequest, Response } from 'express';
-import { IncomingHttpHeaders } from 'http';
-
-// Extend the Express Request type to ensure TypeScript understands headers properly
-interface Request extends ExpressRequest {
-  headers: IncomingHttpHeaders;
-}
+import express from 'express';
+import type { Request, Response } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const router = express.Router();
@@ -286,13 +281,15 @@ router.post('/', async (req: Request, res: Response) => {
   
   try {
     // Check if this is an enhanced format request
-    const isEnhancedFormat = (req.headers['x-request-format'] as string | undefined) === 'enhanced' || req.body?.requestVersion === 2;
+    // Access headers in a type-safe way
+    const requestFormat = req.headers['x-request-format'];
+    const isEnhancedFormat = requestFormat === 'enhanced' || req.body?.requestVersion === 2;
     if (isEnhancedFormat) {
       console.log('Enhanced request format detected');
     }
     
     // Check for API key - either from header or environment
-    const providedApiKey = req.headers['x-api-key'] as string | undefined;
+    const providedApiKey = req.headers['x-api-key'] as string | string[] | undefined;
     const apiKey = providedApiKey || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     
     if (!apiKey) {
