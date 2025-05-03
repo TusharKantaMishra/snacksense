@@ -62,7 +62,8 @@ const getGeminiKey = (): string => {
 };
 
 // Mock data for when no API key is available
-const mockIngredientAnalysis: IngredientAnalysis[] = [
+// Commented out as it's not currently used, but keeping for future reference
+/* const mockIngredientAnalysis: IngredientAnalysis[] = [
   {
     ingredient: "Sugar",
     healthRating: "Bad",
@@ -169,7 +170,7 @@ const mockIngredientAnalysis: IngredientAnalysis[] = [
     sustainabilityScore: 90,
     alternatives: [],
   }
-];
+]; */
 
 // Validate API key middleware
 const validateApiKey = (request: NextRequest): boolean => {

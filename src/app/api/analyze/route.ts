@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as Tesseract from 'tesseract.js';
-import path from 'path';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize Gemini API
@@ -192,7 +191,7 @@ export async function POST(req: NextRequest) {
     ]);
     
     // Perform OCR with multiple attempts for better accuracy with blurry text
-    let allResults = [];
+    const allResults = [];
     let bestResult = null;
     let bestConfidence = 0;
     
@@ -210,8 +209,11 @@ export async function POST(req: NextRequest) {
           // Set configuration for this attempt
           await worker.setParameters(config);
           
+          // Create a blob from the data that Tesseract can handle
+          const blob = new Blob([imageData.data], { type: file.type });
+          
           // Perform OCR
-          const result = await worker.recognize(imageData.url);
+          const result = await worker.recognize(blob);
           
           // Add to results array
           allResults.push({
@@ -226,9 +228,6 @@ export async function POST(req: NextRequest) {
             bestConfidence = result.data.confidence;
             bestResult = result;
           }
-          
-          // Clean up the object URL
-          URL.revokeObjectURL(imageData.url);
         }
       }
       
@@ -240,11 +239,10 @@ export async function POST(req: NextRequest) {
           tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.()[]{}:;-_%$#@!?+*/\\\'\" ', 
         });
         
-        const originalImageUrl = URL.createObjectURL(
-          new Blob([new Uint8Array(buffer)], { type: file.type })
-        );
-        const fallbackResult = await worker.recognize(originalImageUrl);
-        URL.revokeObjectURL(originalImageUrl);
+        // Create a blob from the original buffer
+        const fallbackBlob = new Blob([new Uint8Array(buffer)], { type: file.type });
+        
+        const fallbackResult = await worker.recognize(fallbackBlob);
         
         allResults.push({
           text: fallbackResult.data.text,
@@ -336,220 +334,36 @@ async function processImageForOCR(
   buffer: ArrayBuffer, 
   mimeType: string,
   processingType: 'original' | 'contrast' | 'sharpen' | 'threshold' | 'edge'
-): Promise<{ url: string; processing: string }> {
-  // For original image, just return a blob URL
-  if (processingType === 'original') {
-    const blob = new Blob([new Uint8Array(buffer)], { type: mimeType });
-    return { 
-      url: URL.createObjectURL(blob),
-      processing: 'original'
-    };
-  }
-  
-  // For processed images, we need to use the Canvas API
-  const img = new Image();
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  
-  if (!ctx) {
-    throw new Error('Failed to get canvas context');
-  }
-  
-  // Load image data
-  const imageDataUrl = URL.createObjectURL(
-    new Blob([new Uint8Array(buffer)], { type: mimeType })
-  );
-  
-  return new Promise((resolve, reject) => {
-    img.onload = () => {
-      // Set canvas dimensions to match image
-      canvas.width = img.width;
-      canvas.height = img.height;
-      
-      // Draw the original image
-      ctx.drawImage(img, 0, 0);
-      
-      // Get image data for processing
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      
-      // Apply the specified processing
-      switch(processingType) {
-        case 'contrast':
-          applyContrastEnhancement(ctx, imageData);
-          break;
-        case 'sharpen':
-          applySharpenFilter(ctx, imageData);
-          break;
-        case 'threshold':
-          applyAdaptiveThreshold(ctx, imageData);
-          break;
-        case 'edge':
-          applyEdgeDetection(ctx, imageData);
-          break;
-      }
-      
-      // Convert to blob URL
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          reject(new Error('Failed to create blob from canvas'));
-          return;
-        }
-        
-        // Clean up the original URL
-        URL.revokeObjectURL(imageDataUrl);
-        
-        // Return the processed image URL
-        resolve({
-          url: URL.createObjectURL(blob),
-          processing: processingType
-        });
-      }, 'image/jpeg', 0.95);
-    };
-    
-    img.onerror = () => {
-      URL.revokeObjectURL(imageDataUrl);
-      reject(new Error('Failed to load image for processing'));
-    };
-    
-    img.src = imageDataUrl;
-  });
+): Promise<{ data: Uint8Array; processing: string }> {
+  // Convert ArrayBuffer to Uint8Array for Tesseract compatibility
+  const uint8Array = new Uint8Array(buffer);
+  return { 
+    data: uint8Array,
+    processing: processingType
+  };
 }
 
-// Image processing functions for different strategies
-
-// Enhance contrast for better text visibility
-function applyContrastEnhancement(ctx: CanvasRenderingContext2D, imageData: ImageData): void {
-  const data = imageData.data;
-  const contrast = 1.5; // Higher contrast for blurry text
-  const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-  
-  for (let i = 0; i < data.length; i += 4) {
-    data[i] = factor * (data[i] - 128) + 128;     // r
-    data[i + 1] = factor * (data[i + 1] - 128) + 128; // g
-    data[i + 2] = factor * (data[i + 2] - 128) + 128; // b
-  }
-  
-  ctx.putImageData(imageData, 0, 0);
+// These image processing functions would need to be implemented using server-side
+// image processing libraries like Sharp in a production environment.
+// For now, we're simplifying to ensure deployment compatibility.
+function applyContrastEnhancement(ctx: any, imageData: any): void {
+  // Server-side implementation would go here using libraries like Sharp
+  // Not implementing full functionality to avoid deployment issues
 }
 
-// Apply sharpening filter to make text edges crisper
-function applySharpenFilter(ctx: CanvasRenderingContext2D, imageData: ImageData): void {
-  const data = imageData.data;
-  const width = imageData.width;
-  const height = imageData.height;
-  const tempData = new Uint8ClampedArray(data);
-  
-  // Apply sharpening kernel
-  for (let y = 1; y < height - 1; y++) {
-    for (let x = 1; x < width - 1; x++) {
-      for (let c = 0; c < 3; c++) {
-        const idx = (y * width + x) * 4 + c;
-        const top = (y - 1) * width * 4 + x * 4 + c;
-        const bottom = (y + 1) * width * 4 + x * 4 + c;
-        const left = y * width * 4 + (x - 1) * 4 + c;
-        const right = y * width * 4 + (x + 1) * 4 + c;
-        
-        // Convolution with sharpening kernel [0, -1, 0, -1, 5, -1, 0, -1, 0]
-        let val = 5 * tempData[idx] - tempData[top] - tempData[bottom] - tempData[left] - tempData[right];
-        data[idx] = Math.max(0, Math.min(255, val));
-      }
-    }
-  }
-  
-  ctx.putImageData(imageData, 0, 0);
+function applySharpenFilter(ctx: any, imageData: any): void {
+  // Server-side implementation would go here using libraries like Sharp
+  // Not implementing full functionality to avoid deployment issues
 }
 
-// Apply adaptive threshold for better binarization of blurry text
-function applyAdaptiveThreshold(ctx: CanvasRenderingContext2D, imageData: ImageData): void {
-  const data = imageData.data;
-  const width = imageData.width;
-  const blockSize = 11; // Size of the block for adaptive threshold
-  const c = 2; // Constant subtracted from mean
-  
-  // Convert to grayscale first
-  for (let i = 0; i < data.length; i += 4) {
-    const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-    data[i] = data[i + 1] = data[i + 2] = gray;
-  }
-  
-  // Apply adaptive threshold
-  for (let y = 0; y < imageData.height; y++) {
-    for (let x = 0; x < width; x++) {
-      const idx = (y * width + x) * 4;
-      
-      // Calculate average in the blockSize x blockSize region
-      let sum = 0;
-      let count = 0;
-      
-      const startY = Math.max(0, y - Math.floor(blockSize / 2));
-      const endY = Math.min(imageData.height, y + Math.floor(blockSize / 2) + 1);
-      const startX = Math.max(0, x - Math.floor(blockSize / 2));
-      const endX = Math.min(width, x + Math.floor(blockSize / 2) + 1);
-      
-      for (let wy = startY; wy < endY; wy++) {
-        for (let wx = startX; wx < endX; wx++) {
-          const widx = (wy * width + wx) * 4;
-          sum += data[widx];
-          count++;
-        }
-      }
-      
-      const mean = sum / count;
-      
-      // Apply threshold
-      const val = data[idx] < (mean - c) ? 0 : 255;
-      data[idx] = data[idx + 1] = data[idx + 2] = val;
-    }
-  }
-  
-  ctx.putImageData(imageData, 0, 0);
+function applyAdaptiveThreshold(ctx: any, imageData: any): void {
+  // Server-side implementation would go here using libraries like Sharp
+  // Not implementing full functionality to avoid deployment issues
 }
 
-// Apply edge detection to highlight text boundaries
-function applyEdgeDetection(ctx: CanvasRenderingContext2D, imageData: ImageData): void {
-  const data = imageData.data;
-  const width = imageData.width;
-  const height = imageData.height;
-  const tempData = new Uint8ClampedArray(data);
-  
-  // Convert to grayscale first
-  for (let i = 0; i < data.length; i += 4) {
-    const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-    tempData[i] = tempData[i + 1] = tempData[i + 2] = gray;
-  }
-  
-  // Apply Sobel operator for edge detection
-  for (let y = 1; y < height - 1; y++) {
-    for (let x = 1; x < width - 1; x++) {
-      // For each pixel, calculate gradient
-      const idx = (y * width + x) * 4;
-      
-      // 3x3 neighbors for Sobel
-      const tl = tempData[((y - 1) * width + (x - 1)) * 4];
-      const t = tempData[((y - 1) * width + x) * 4];
-      const tr = tempData[((y - 1) * width + (x + 1)) * 4];
-      const l = tempData[(y * width + (x - 1)) * 4];
-      const r = tempData[(y * width + (x + 1)) * 4];
-      const bl = tempData[((y + 1) * width + (x - 1)) * 4];
-      const b = tempData[((y + 1) * width + x) * 4];
-      const br = tempData[((y + 1) * width + (x + 1)) * 4];
-      
-      // Sobel X gradient: [-1, 0, 1, -2, 0, 2, -1, 0, 1]
-      const gx = -tl - 2 * l - bl + tr + 2 * r + br;
-      
-      // Sobel Y gradient: [-1, -2, -1, 0, 0, 0, 1, 2, 1]
-      const gy = -tl - 2 * t - tr + bl + 2 * b + br;
-      
-      // Gradient magnitude
-      const g = Math.sqrt(gx * gx + gy * gy);
-      
-      // Threshold the edge detection result
-      const val = g > 30 ? 255 : 0;
-      data[idx] = data[idx + 1] = data[idx + 2] = val;
-    }
-  }
-  
-  ctx.putImageData(imageData, 0, 0);
+function applyEdgeDetection(ctx: any, imageData: any): void {
+  // Server-side implementation would go here using libraries like Sharp
+  // Not implementing full functionality to avoid deployment issues
 }
 
 // Dictionary-based enhancement of extracted text
@@ -748,7 +562,7 @@ function extractIngredientsList(text: string): string[] {
   
   // Extract specific ingredient section if possible
   const ingredientsMatch = text.match(/ingredients\s*:\s*([^.]+(?:\.[^.]+)*)/i);
-  let textToSearch = ingredientsMatch ? text.slice(text.indexOf(ingredientsMatch[0])) : text;
+  const textToSearch = ingredientsMatch ? text.slice(text.indexOf(ingredientsMatch[0])) : text;
   
   // Split by the best delimiter and process each ingredient
   let ingredients = textToSearch
@@ -967,6 +781,13 @@ function extractNutritionalInfo(text: string): Record<string, string> {
     }
   }
   
+  // Clean up each value to ensure consistency
+  for (const [key, unused] of Object.entries(nutritionalInfo)) {
+    if (nutritionalInfo[key]) {
+      nutritionalInfo[key] = nutritionalInfo[key].trim();
+    }
+  }
+  
   return nutritionalInfo;
 }
 
@@ -1019,7 +840,6 @@ function generateProductSummary(ingredients: IngredientAnalysis[], nutritionalIn
   if (nutritionalInfo.sugars) {
     const sugarAmount = parseFloat(nutritionalInfo.sugars);
     if (!isNaN(sugarAmount)) {
-      const sugarUnit = nutritionalInfo.sugars.match(/[a-z]+$/i)?.[0] || 'g';
       if (sugarAmount > 10) {
         summary += ` The product has a high sugar content (${nutritionalInfo.sugars}).`;
       }
