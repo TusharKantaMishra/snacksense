@@ -281,15 +281,13 @@ router.post('/', async (req: Request, res: Response) => {
   
   try {
     // Check if this is an enhanced format request
-    // Access headers in a type-safe way
-    const requestFormat = req.headers['x-request-format'];
-    const isEnhancedFormat = requestFormat === 'enhanced' || req.body?.requestVersion === 2;
+    const isEnhancedFormat = ((req.headers as any)['x-request-format'] === 'enhanced') || req.body?.requestVersion === 2;
     if (isEnhancedFormat) {
       console.log('Enhanced request format detected');
     }
     
     // Check for API key - either from header or environment
-    const providedApiKey = req.headers['x-api-key'] as string | string[] | undefined;
+    const providedApiKey = (req.headers as any)['x-api-key'];
     const apiKey = providedApiKey || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     
     if (!apiKey) {
