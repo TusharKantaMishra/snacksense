@@ -11,6 +11,8 @@ type TesseractWorkerMethods = {
   loadLanguage: (lang: string) => Promise<unknown>;
   initialize: (lang: string) => Promise<unknown>;
   setParameters: (params: Record<string, string | number>) => Promise<unknown>;
+  recognize: (image: File | string | Blob) => Promise<any>;
+  terminate: () => Promise<unknown>;
 };
 
 interface IngredientAnalysis {
@@ -523,12 +525,9 @@ export default function Upload() {
       // First worker optimized for ingredient lists (fine details, smaller text)
       const ingredientWorker = await createWorker();
       
-      // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
-      await (ingredientWorker as TesseractWorkerMethods).loadLanguage('eng');
-      // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
-      await (ingredientWorker as TesseractWorkerMethods).initialize('eng');
-      // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
-      await (ingredientWorker as TesseractWorkerMethods).setParameters({
+      await ((ingredientWorker as unknown) as TesseractWorkerMethods).loadLanguage('eng');
+      await ((ingredientWorker as unknown) as TesseractWorkerMethods).initialize('eng');
+      await ((ingredientWorker as unknown) as TesseractWorkerMethods).setParameters({
         preserve_interword_spaces: '1',
         tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.():;%-_',
         tessedit_pageseg_mode: PSM.SINGLE_BLOCK, // 6 - Assume a single uniform block of text
@@ -540,12 +539,9 @@ export default function Upload() {
       // Second worker optimized for product names and headers (larger text)
       const headerWorker = await createWorker();
       
-      // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
-      await (headerWorker as TesseractWorkerMethods).loadLanguage('eng');
-      // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
-      await (headerWorker as TesseractWorkerMethods).initialize('eng');
-      // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
-      await (headerWorker as TesseractWorkerMethods).setParameters({
+      await ((headerWorker as unknown) as TesseractWorkerMethods).loadLanguage('eng');
+      await ((headerWorker as unknown) as TesseractWorkerMethods).initialize('eng');
+      await ((headerWorker as unknown) as TesseractWorkerMethods).setParameters({
         preserve_interword_spaces: '1',
         tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.():;%-_', 
         tessedit_pageseg_mode: PSM.SINGLE_LINE, // 7 - Treat the image as a single text line
@@ -555,9 +551,7 @@ export default function Upload() {
         tessjs_create_tsv: '0',
       });
       
-      // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
       ocrScheduler.addWorker(ingredientWorker);
-      // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
       ocrScheduler.addWorker(headerWorker);
       
       // Save references for cleanup
@@ -577,22 +571,19 @@ export default function Upload() {
           const imageBitmap = await createImageBitmap(image);
           
           // Create multiple canvas versions with different preprocessing techniques
-          const createProcessedVersion = async (processingFunction: (ctx: CanvasRenderingContext2D, imgData: ImageData) => void, name: string): Promise<File> => {
+          const createProcessedVersion = async (processingFunction: (ctx: CanvasRenderingContext2D) => void, name: string): Promise<File> => {
             const canvas = document.createElement('canvas');
             canvas.width = imageBitmap.width;
             canvas.height = imageBitmap.height;
             
-            const ctx = canvas.getContext('2d');
-            if (!ctx) throw new Error('Failed to get canvas context');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            if (!ctx) throw new Error('Failed to get canvas 2D context');
             
             // Draw the initial image
             ctx.drawImage(imageBitmap, 0, 0);
             
-            // Get the image data for processing
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            
             // Apply the specific processing function
-            processingFunction(ctx, imageData);
+            processingFunction(ctx);
             
             // Convert to blob/file
             const processedBlob = await new Promise<Blob>(resolve => {
@@ -603,23 +594,25 @@ export default function Upload() {
           };
           
           // 1. Standard contrast enhancement (good for normal text)
-          const contrastEnhancement = async (ctx: CanvasRenderingContext2D, imgData: ImageData) => {
-            const data = imgData.data;
+          const contrastEnhancement = async (ctx: CanvasRenderingContext2D) => {
+            const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+            const data = imageData.data;
             const contrast = 1.3; // Increase contrast by 30%
             const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
             
             for (let i = 0; i < data.length; i += 4) {
-              data[i] = factor * (data[i] - 128) + 128; // r
+              data[i] = factor * (data[i] - 128) + 128;     // r
               data[i + 1] = factor * (data[i + 1] - 128) + 128; // g
               data[i + 2] = factor * (data[i + 2] - 128) + 128; // b
             }
             
-            ctx.putImageData(imgData, 0, 0);
+            ctx.putImageData(imageData, 0, 0);
           };
           
           // 2. Special processing for blurry text 
-          const blurryTextEnhancement = async (ctx: CanvasRenderingContext2D, imgData: ImageData) => {
-            const data = imgData.data;
+          const blurryTextEnhancement = async (ctx: CanvasRenderingContext2D) => {
+            const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+            const data = imageData.data;
             
             // First convert to grayscale to simplify text detection
             for (let i = 0; i < data.length; i += 4) {
@@ -635,7 +628,7 @@ export default function Upload() {
               data[i] = data[i + 1] = data[i + 2] = value;
             }
             
-            ctx.putImageData(imgData, 0, 0);
+            ctx.putImageData(imageData, 0, 0);
             
             // Apply unsharp masking for edge enhancement (helps with blurry text)
             ctx.filter = 'contrast(120%) brightness(105%)';
@@ -645,7 +638,7 @@ export default function Upload() {
           };
           
           // 3. Edge detection enhancement for text boundaries
-          const edgeEnhancement = async (ctx: CanvasRenderingContext2D, imgData: ImageData) => {
+          const edgeEnhancement = async (ctx: CanvasRenderingContext2D) => {
             // Apply a combination of techniques optimal for text edges
             ctx.filter = 'saturate(0%) contrast(160%)';
             // Use the current canvas - ctx automatically refers to its own canvas
@@ -697,7 +690,6 @@ export default function Upload() {
         
         // PASS 1: Process the main enhanced image
         console.log('OCR Pass 1: Processing main enhanced image');
-        // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
         const mainResult = await ocrScheduler.addJob('recognize', imageSource);
         ocrResults.push({
           text: mainResult.data.text,
@@ -717,7 +709,6 @@ export default function Upload() {
               if (idx === 0 && img === imageSource) return null;
               
               console.log(`Processing specialized image #${idx+1}`);
-              // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
               const result = await ocrScheduler.addJob('recognize', img);
               return {
                 text: result.data.text,
@@ -740,8 +731,7 @@ export default function Upload() {
         try {
           if (primaryWorker) {
             // Configure primary worker specifically for blurry text
-            // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
-            await (primaryWorker as TesseractWorkerMethods).setParameters({
+            await ((primaryWorker as unknown) as TesseractWorkerMethods).setParameters({
               tessedit_pageseg_mode: PSM.SPARSE_TEXT, // Better for ingredient lists
               tessedit_char_blacklist: '[]{}^~|\\', // Remove problematic symbols often misread in blurry text
               textord_min_linesize: '1.25', // Better for small text
@@ -750,8 +740,7 @@ export default function Upload() {
               tessjs_create_tsv: '0',
             });
             
-            // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
-            const blurryResult = await (primaryWorker as TesseractWorkerMethods).recognize(imageSource);
+            const blurryResult = await ((primaryWorker as unknown) as TesseractWorkerMethods).recognize(imageSource);
             ocrResults.push({
               text: blurryResult.data.text,
               confidence: blurryResult.data.confidence || 0,
@@ -770,8 +759,7 @@ export default function Upload() {
         console.warn('Scheduler OCR failed, falling back to single worker', err);
         // Fallback to single worker if scheduler fails
         if (primaryWorker) {
-          // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
-          const fallbackResult = await (primaryWorker as TesseractWorkerMethods).recognize(imageSource);
+          const fallbackResult = await ((primaryWorker as unknown) as TesseractWorkerMethods).recognize(imageSource);
           ocrResults.push({
             text: fallbackResult.data.text,
             confidence: fallbackResult.data.confidence || 0,
@@ -780,12 +768,9 @@ export default function Upload() {
         } else {
           // Create a new worker as last resort
           const fallbackWorker = await createWorker();
-          // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
-          await (fallbackWorker as TesseractWorkerMethods).loadLanguage('eng');
-          // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
-          await (fallbackWorker as TesseractWorkerMethods).initialize('eng');
-          // @ts-ignore - Tesseract.js API has methods not reflected in TS definitions
-          const fallbackResult = await (fallbackWorker as TesseractWorkerMethods).recognize(imageSource);
+          await ((fallbackWorker as unknown) as TesseractWorkerMethods).loadLanguage('eng');
+          await ((fallbackWorker as unknown) as TesseractWorkerMethods).initialize('eng');
+          const fallbackResult = await ((fallbackWorker as unknown) as TesseractWorkerMethods).recognize(imageSource);
           ocrResults.push({
             text: fallbackResult.data.text,
             confidence: fallbackResult.data.confidence || 0,
@@ -1344,7 +1329,7 @@ export default function Upload() {
       // Ensure all workers are terminated even if scheduler termination fails
       for (const w of workerList) {
         try {
-          await w.terminate();
+          await ((w as unknown) as TesseractWorkerMethods).terminate();
         } catch (e) {
           console.warn('Error terminating worker:', e);
         }
@@ -1458,7 +1443,7 @@ export default function Upload() {
               aria-label="Close camera"
               disabled={loading}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -1627,8 +1612,8 @@ export default function Upload() {
       {error && (
         <div className="mb-6 p-4 bg-red-100 text-red-800 rounded border border-red-200">
           <div className="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
             <p><strong>Error:</strong> {error}</p>
           </div>

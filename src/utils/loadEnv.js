@@ -1,9 +1,9 @@
 // Utility to load environment variables from .env.local
-const fs = require('fs');
-const path = require('path');
-const dotenv = require('dotenv');
+import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
 
-function loadEnvFile() {
+export function loadEnvFile() {
   try {
     // Path to .env.local file
     const envLocalPath = path.resolve(process.cwd(), '.env.local');
@@ -32,4 +32,5 @@ function loadEnvFile() {
   }
 }
 
-module.exports = { loadEnvFile };
+// Export as a named export instead of CommonJS
+export default { loadEnvFile };

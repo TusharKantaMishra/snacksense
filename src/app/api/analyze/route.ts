@@ -181,6 +181,20 @@ export async function POST(req: NextRequest) {
       );
     }
     
+    // Process image with different techniques to improve OCR for blurry text
+    async function processImageForOCR(
+      buffer: ArrayBuffer, 
+      mimeType: string,
+      processingType: 'original' | 'contrast' | 'sharpen' | 'threshold' | 'edge'
+    ): Promise<{ data: Uint8Array; processing: string }> {
+      // Convert ArrayBuffer to Uint8Array for Tesseract compatibility
+      const uint8Array = new Uint8Array(buffer);
+      return { 
+        data: uint8Array,
+        processing: processingType
+      };
+    }
+
     // Apply image preprocessing for blurry text
     const imageProcessingResults = await Promise.all([
       processImageForOCR(buffer, file.type, 'original'),
@@ -327,43 +341,6 @@ export async function POST(req: NextRequest) {
       }
     }
   }
-}
-
-// Process image with different techniques to improve OCR for blurry text
-async function processImageForOCR(
-  buffer: ArrayBuffer, 
-  mimeType: string,
-  processingType: 'original' | 'contrast' | 'sharpen' | 'threshold' | 'edge'
-): Promise<{ data: Uint8Array; processing: string }> {
-  // Convert ArrayBuffer to Uint8Array for Tesseract compatibility
-  const uint8Array = new Uint8Array(buffer);
-  return { 
-    data: uint8Array,
-    processing: processingType
-  };
-}
-
-// These image processing functions would need to be implemented using server-side
-// image processing libraries like Sharp in a production environment.
-// For now, we're simplifying to ensure deployment compatibility.
-function applyContrastEnhancement(ctx: any, imageData: any): void {
-  // Server-side implementation would go here using libraries like Sharp
-  // Not implementing full functionality to avoid deployment issues
-}
-
-function applySharpenFilter(ctx: any, imageData: any): void {
-  // Server-side implementation would go here using libraries like Sharp
-  // Not implementing full functionality to avoid deployment issues
-}
-
-function applyAdaptiveThreshold(ctx: any, imageData: any): void {
-  // Server-side implementation would go here using libraries like Sharp
-  // Not implementing full functionality to avoid deployment issues
-}
-
-function applyEdgeDetection(ctx: any, imageData: any): void {
-  // Server-side implementation would go here using libraries like Sharp
-  // Not implementing full functionality to avoid deployment issues
 }
 
 // Dictionary-based enhancement of extracted text
@@ -741,7 +718,9 @@ function extractNutritionalInfo(text: string): Record<string, string> {
       // Example: "Total Fat 8g 12%"
       const lineMatch = line.match(/([A-Za-z\s]+)\s+(\d+\.?\d*\s*[a-zA-Z]+)(?:\s+(\d+)%)?/);
       if (lineMatch) {
-        const [_, nutrientName, amount, dailyValue] = lineMatch;
+        const nutrientName = lineMatch[1];
+        const amount = lineMatch[2];
+        const dailyValue = lineMatch[3];
         const normalizedName = nutrientName.trim().toLowerCase()
           .replace(/\s+/g, '') // Remove spaces
           .replace(/^\w/, c => c.toUpperCase()); // Capitalize first letter
@@ -782,7 +761,7 @@ function extractNutritionalInfo(text: string): Record<string, string> {
   }
   
   // Clean up each value to ensure consistency
-  for (const [key, unused] of Object.entries(nutritionalInfo)) {
+  for (const [key, value] of Object.entries(nutritionalInfo)) {
     if (nutritionalInfo[key]) {
       nutritionalInfo[key] = nutritionalInfo[key].trim();
     }

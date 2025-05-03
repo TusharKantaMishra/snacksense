@@ -123,8 +123,7 @@ No preservatives, artificial sweeteners or colouring agents used.`;
         
         {imagePreviewUrl && (
           <div className={styles.imagePreview}>
-            {/* Using standard img tag for blob URLs - this is necessary for this specific use case
-                as we're working with local blob URLs which Next.js Image component doesn't handle well */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               src={imagePreviewUrl} 
               alt="Uploaded food label" 
