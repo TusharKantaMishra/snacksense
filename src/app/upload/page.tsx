@@ -1275,7 +1275,7 @@ export default function Upload() {
             // If local analysis fails or can't be used, show the standard error
             setError(
               <div className="p-4 bg-amber-50 rounded-lg border border-amber-200 text-center">
-                <h3 className="font-bold text-amber-800 mb-2">We're experiencing high demand</h3>
+                <h3 className="font-bold text-amber-800 mb-2">We&apos;re experiencing high demand</h3>
                 <p className="text-amber-700 font-medium">
                   Please try again in a few minutes.
                 </p>
