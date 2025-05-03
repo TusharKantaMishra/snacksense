@@ -762,8 +762,8 @@ function extractNutritionalInfo(text: string): Record<string, string> {
   
   // Clean up each value to ensure consistency
   for (const [key, value] of Object.entries(nutritionalInfo)) {
-    if (nutritionalInfo[key]) {
-      nutritionalInfo[key] = nutritionalInfo[key].trim();
+    if (value) {
+      nutritionalInfo[key] = value.trim();
     }
   }
   

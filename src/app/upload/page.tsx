@@ -11,7 +11,17 @@ type TesseractWorkerMethods = {
   loadLanguage: (lang: string) => Promise<unknown>;
   initialize: (lang: string) => Promise<unknown>;
   setParameters: (params: Record<string, string | number>) => Promise<unknown>;
-  recognize: (image: File | string | Blob) => Promise<any>;
+  recognize: (image: File | string | Blob) => Promise<{
+    data: { 
+      text: string; 
+      confidence: number;
+      words?: Array<{
+        text: string;
+        confidence: number;
+        bbox?: { x0: number; y0: number; x1: number; y1: number };
+      }>;
+    };
+  }>;
   terminate: () => Promise<unknown>;
 };
 
@@ -512,7 +522,7 @@ export default function Upload() {
     
     // Define workers and scheduler with proper types
     let primaryWorker;
-    let ocrScheduler: any;
+    let ocrScheduler: import('tesseract.js').Scheduler | null = null;
     const workerList = [];
     
     try {
@@ -680,7 +690,7 @@ export default function Upload() {
       console.log('Running advanced multi-pass OCR with blurry text optimization...');
       
       // Track all OCR results to combine for best output
-      const ocrResults: { text: string; confidence: number; source: string }[] = [];
+      const ocrResults: { text: string; confidence: number; processing: string }[] = [];
       
       try {
         // Make sure the scheduler is initialized
@@ -690,13 +700,21 @@ export default function Upload() {
         
         // PASS 1: Process the main enhanced image
         console.log('OCR Pass 1: Processing main enhanced image');
-        const mainResult = await ocrScheduler.addJob('recognize', imageSource);
-        ocrResults.push({
-          text: mainResult.data.text,
-          confidence: mainResult.data.confidence || 0,
-          source: 'main_enhanced'
-        });
-        console.log(`Main image OCR complete - ${mainResult.data.text.length} characters, confidence: ${mainResult.data.confidence}`);
+        let mainResultText = '';
+        let mainResultConfidence = 0;
+        
+        if (ocrScheduler) {
+          const mainResult = await ocrScheduler.addJob('recognize', imageSource);
+          ocrResults.push({
+            text: mainResult.data.text,
+            confidence: mainResult.data.confidence || 0,
+            processing: 'main'
+          });
+          
+          mainResultText = mainResult.data.text;
+          mainResultConfidence = mainResult.data.confidence || 0;
+        }
+        console.log(`Main image OCR complete - ${mainResultText.length} characters, confidence: ${mainResultConfidence}`);
         
         // PASS 2: Process additional preprocessed images for blurry text
         if (preprocessedImages.length > 0) {
@@ -706,24 +724,28 @@ export default function Upload() {
           const specializedResults = await Promise.all(
             preprocessedImages.map(async (img, idx) => {
               // Skip the first one if it's the same as imageSource
-              if (idx === 0 && img === imageSource) return null;
+              if (idx === 0 && img === imageSource) return { text: '', confidence: 0, processing: 'skipped' };
               
               console.log(`Processing specialized image #${idx+1}`);
-              const result = await ocrScheduler.addJob('recognize', img);
-              return {
-                text: result.data.text,
-                confidence: result.data.confidence || 0,
-                source: `specialized_${idx}`
-              };
+              if (ocrScheduler) {
+                const result = await ocrScheduler.addJob('recognize', img);
+                return {
+                  text: result.data.text,
+                  confidence: result.data.confidence || 0,
+                  processing: `specialized-${idx}`
+                };
+              }
+              // Return a default object if scheduler is null
+              return { text: '', confidence: 0, processing: 'failed' };
             })
           );
           
           // Add valid results to our collection
-          specializedResults.filter(Boolean).forEach(result => {
+          specializedResults.forEach(result => {
             if (result) ocrResults.push(result);
           });
           
-          console.log(`Completed processing ${specializedResults.filter(Boolean).length} specialized images`);
+          console.log(`Completed processing ${specializedResults.length} specialized images`);
         }
         
         // PASS 3: Run a dedicated blurry text pass with adaptive thresholding
@@ -744,7 +766,7 @@ export default function Upload() {
             ocrResults.push({
               text: blurryResult.data.text,
               confidence: blurryResult.data.confidence || 0,
-              source: 'blurry_optimized'
+              processing: 'blurry_optimized'
             });
             console.log(`Blurry text pass complete - ${blurryResult.data.text.length} characters`);
           }
@@ -763,7 +785,7 @@ export default function Upload() {
           ocrResults.push({
             text: fallbackResult.data.text,
             confidence: fallbackResult.data.confidence || 0,
-            source: 'fallback_primary'
+            processing: 'fallback_primary'
           });
         } else {
           // Create a new worker as last resort
@@ -774,7 +796,7 @@ export default function Upload() {
           ocrResults.push({
             text: fallbackResult.data.text,
             confidence: fallbackResult.data.confidence || 0,
-            source: 'last_resort'
+            processing: 'last_resort'
           });
           // Make sure to terminate this worker later
           workerList.push(fallbackWorker);
@@ -802,10 +824,10 @@ export default function Upload() {
       });
       
       console.log('OCR results ranked by quality:', 
-        ocrResults.map(r => `${r.source}: ${r.text.length} chars, ${r.confidence.toFixed(2)} confidence`).join('\n'));
+        ocrResults.map(r => `${r.processing}: ${r.text.length} chars, ${r.confidence.toFixed(2)} confidence`).join('\n'));
       
       // 2. Find ingredient sections in each result
-      const ingredientExtractionsWithScore: {text: string; score: number; source: string}[] = [];
+      const ingredientExtractionsWithScore: {text: string; score: number; processing: string}[] = [];
       
       // Process each OCR result to extract ingredients section
       for (const ocrResult of ocrResults) {
@@ -817,7 +839,7 @@ export default function Upload() {
         
         // If standard extraction didn't find a clear section, try blurry text specialized extraction
         if (ingredientSection === ocrResult.text) {
-          console.log(`No clear ingredient section found in ${ocrResult.source}, trying blurry text extraction`);
+          console.log(`No clear ingredient section found in ${ocrResult.processing}, trying blurry text extraction`);
           ingredientSection = extractIngredientsFromBlurryText(ocrResult.text);
         }
         
@@ -831,10 +853,10 @@ export default function Upload() {
           ingredientExtractionsWithScore.push({
             text: ingredientSection,
             score: sectionScore,
-            source: `${ocrResult.source}${isCleanExtraction ? '_clean' : '_heuristic'}`
+            processing: `${ocrResult.processing}${isCleanExtraction ? '_clean' : '_heuristic'}`
           });
           
-          console.log(`Found ingredient section in ${ocrResult.source}: ${ingredientSection.length} chars, score: ${sectionScore.toFixed(2)}`);
+          console.log(`Found ingredient section in ${ocrResult.processing}: ${ingredientSection.length} chars, score: ${sectionScore.toFixed(2)}`);
         }
       }
       
@@ -847,11 +869,11 @@ export default function Upload() {
         
         // Use the highest scoring ingredients section
         extractedText = ingredientExtractionsWithScore[0].text;
-        console.log(`Selected best ingredient section from ${ingredientExtractionsWithScore[0].source} with score ${ingredientExtractionsWithScore[0].score.toFixed(2)}`);
+        console.log(`Selected best ingredient section from ${ingredientExtractionsWithScore[0].processing} with score ${ingredientExtractionsWithScore[0].score.toFixed(2)}`);
       } else {
         // Fallback to highest confidence OCR result
         extractedText = ocrResults[0].text;
-        console.log(`No clear ingredient sections found, using best OCR result from ${ocrResults[0].source}`);
+        console.log(`No clear ingredient sections found, using best OCR result from ${ocrResults[0].processing}`);
       }
       
       console.log('Extracted text for processing:', extractedText.substring(0, 300) + '...');
@@ -1083,7 +1105,26 @@ export default function Upload() {
       
       // Prepare ingredients for Gemini analysis with optimized structure
       // Format the ingredients in a clearer, more structured way for better analysis
-      const formatIngredientsForAnalysis = (ingredients: any[], productInfo: any): string => {
+      interface IngredientForAnalysis {
+        name: string;
+        scientificName?: string;
+        quantity?: string;
+        healthRating?: string;
+        explanation?: string;
+      }
+
+      interface ProductInfoForAnalysis {
+        brand?: string;
+        name?: string;
+        servingSize?: string;
+        calories?: string;
+        [key: string]: string | undefined;
+      }
+
+      const formatIngredientsForAnalysis = (
+        ingredients: IngredientForAnalysis[], 
+        productInfo: ProductInfoForAnalysis
+      ): string => {
         // Create a structured ingredient list with proper formatting
         const formattedIngredients = ingredients.map((ing: { 
           name: string; 
@@ -1176,13 +1217,22 @@ export default function Upload() {
         }
         
         setProgress(100);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('API request error:', error);
         
         // Check for specific backend error messages
-        if (error.response) {
-          const statusCode = error.response.status;
-          const errorMessage = error.response.data?.error || error.message;
+        const err = error as { 
+          response?: { 
+            status: number; 
+            data?: { error?: string }; 
+          }; 
+          request?: unknown;
+          message: string;
+        };
+        
+        if (err.response) {
+          const statusCode = err.response.status;
+          const errorMessage = err.response.data?.error || err.message;
           
           console.error(`Backend returned ${statusCode} error:`, errorMessage);
           
@@ -1255,7 +1305,7 @@ export default function Upload() {
               </div>
             );
           }
-        } else if (error.request) {
+        } else if (err.request) {
           console.log('Network error, attempting direct OCR-to-analysis fallback');
           
           // Try to extract and analyze ingredients directly from the OCR text
@@ -1301,7 +1351,7 @@ export default function Upload() {
           setError(
             <div className="p-4 bg-red-50 rounded-lg border border-red-200">
               <h3 className="font-bold text-red-800 mb-2">Error</h3>
-              <p className="text-red-700">{error.message || 'Unknown error'}</p>
+              <p className="text-red-700">{err.message || 'Unknown error'}</p>
             </div>
           );
         }
@@ -1510,7 +1560,7 @@ export default function Upload() {
           >
             <div className="flex flex-col items-center justify-center h-full">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-cyan-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
               <h3 className="font-medium text-lg mb-2">Upload from Device</h3>
               <p className="text-sm">Browse your files or drag &amp; drop an image here</p>
