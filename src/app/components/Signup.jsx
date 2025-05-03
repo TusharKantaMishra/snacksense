@@ -38,19 +38,34 @@ function Signup() {
       // Create user with email and password
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      let firestoreError = false;
       
-      // Store additional user data (name) in Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        name: name,
-        email: email,
-        createdAt: new Date().toISOString(),
-      });
+      // Store additional user data (name) in Firestore - in a separate try/catch
+      try {
+        await setDoc(doc(db, "users", user.uid), {
+          name: name,
+          email: email,
+          createdAt: new Date().toISOString(),
+        });
+        console.log("User profile saved successfully.");
+      } catch (firestoreErr) {
+        console.error("Firestore error (non-blocking):", firestoreErr);
+        firestoreError = true;
+        // Continue with login process even if saving profile data fails
+      }
 
       console.log("User registered successfully:", user.uid);
       setName('');
       setEmail('');
       setPassword('');
       setLoading(false);
+      
+      // Proceed with navigation regardless of Firestore success
+      if (firestoreError) {
+        // Just a warning for the console, but we still navigate the user forward
+        console.warn("Note: User was created but profile data couldn't be saved. This won't affect basic functionality.");
+      }
+      
       router.push('/'); // Redirect to homepage
     } catch (err) {
       setLoading(false);
