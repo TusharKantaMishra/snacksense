@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation"; // Import usePathname hook
 import "../styles/globals.css"; // Import global styles
 import Navbar from "./components/Navbar"; // Import Navbar
 import Footer from "./components/Footer"; // Import Footer
+import { AuthProvider } from "./providers"; // Import our AuthProvider
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname(); // Get the current route
@@ -27,16 +28,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* 🌀 Cursor Glow Effect */}
         <div className="cursor-glow"></div>
 
-        {/* 🏆 Navbar (Only hide on login/signup pages) */}
-        {!isAuthPage && <Navbar />}
+        {/* Wrap the entire application with our AuthProvider */}
+        <AuthProvider>
+          {/* 🏆 Navbar (Only hide on login/signup pages) */}
+          {!isAuthPage && <Navbar />}
 
-        {/* 🌟 Page Content */}
-        <div className="page-container">
-          {children}
-        </div>
+          {/* 🌟 Page Content */}
+          <div className="page-container">
+            {children}
+          </div>
 
-        {/* ⚡ Footer (Only hide on login/signup pages) */}
-        {!isAuthPage && <Footer />}
+          {/* ⚡ Footer (Only hide on login/signup pages) */}
+          {!isAuthPage && <Footer />}
+        </AuthProvider>
       </body>
     </html>
   );

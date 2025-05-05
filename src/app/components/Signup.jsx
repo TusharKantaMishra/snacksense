@@ -10,6 +10,8 @@ import Image from 'next/image';
 import '../../styles/signup.css';
 import image from '../../../public/images/cropped-logo.png';
 import { auth, db } from '../../lib/firebase'; // Import auth and db from centralized Firebase config
+import { useAuth } from '../../context/AuthContext'; // Import auth context
+import Toast from "./ui/Toast"; // Import Toast component
 
 function Signup() {
   const [name, setName] = useState('');
@@ -17,17 +19,27 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('error');
   const router = useRouter();
-  
-  // No need for useEffect to initialize Firebase - we're using the centralized configuration
+  const { setTokenCookie } = useAuth();
+
+  const showError = (message, type = 'error') => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+    setError(message); // Keep the inline error message for accessibility
+  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
+    setShowToast(false);
     setLoading(true); // Start loading
 
     if (!name || !email || !password) {
-      setError('Name, email and password are required');
+      showError('Name, email and password are required');
       setLoading(false);
       return;
     }
@@ -55,6 +67,11 @@ function Signup() {
       }
 
       console.log("User registered successfully:", user.uid);
+      
+      // Set token cookie via AuthContext
+      await setTokenCookie(true);
+      
+      // Reset form state
       setName('');
       setEmail('');
       setPassword('');
@@ -66,7 +83,7 @@ function Signup() {
         console.warn("Note: User was created but profile data couldn't be saved. This won't affect basic functionality.");
       }
       
-      router.push('/'); // Redirect to homepage
+      router.push('/home'); // Redirect to home page
     } catch (err) {
       setLoading(false);
       console.error("Registration error:", err);
@@ -74,28 +91,36 @@ function Signup() {
       // Handle specific Firebase Authentication errors
       switch (err.code) {
         case 'auth/email-already-in-use':
-          setError('Email is already in use.');
+          showError('Email is already in use.');
           break;
         case 'auth/invalid-email':
-          setError('Invalid email format.');
+          showError('Invalid email format.');
           break;
         case 'auth/weak-password':
-          setError('Password is too weak. It should be at least 6 characters.');
+          showError('Password is too weak. It should be at least 6 characters.');
           break;
         case 'auth/network-request-failed':
-          setError('Network error. Please check your connection.');
+          showError('Network error. Please check your connection.');
           break;
         case 'auth/api-key-not-valid':
-          setError('Invalid Firebase API key. Please check your environment configuration.');
+          showError('Invalid Firebase API key. Please check your environment configuration.');
           break;
         default:
-          setError(`Registration error: ${err.message || 'Unknown error'}`);
+          showError(`Registration error: ${err.message || 'Unknown error'}`);
       }
     }
   };
 
   return (
     <div className="register-container">
+      {/* Toast notification for errors */}
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        show={showToast}
+        onClose={() => setShowToast(false)}
+      />
+      
       {/* Animated background particles */}
       <div className="particle"></div>
       <div className="particle"></div>

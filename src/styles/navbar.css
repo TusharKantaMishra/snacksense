@@ -119,6 +119,156 @@
   transform: scaleX(1);
 }
 
+/* Profile Icon and Dropdown Styling */
+.profile-container {
+  position: relative;
+  margin-left: auto; /* Push to right side */
+  margin-right: 20px; /* Add some spacing from right edge */
+  display: flex;
+  align-items: center;
+  z-index: 100;
+}
+
+.profile-icon-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  margin-left: auto; /* Additional alignment to right */
+}
+
+.profile-icon-wrapper:hover {
+  background: rgba(66, 165, 245, 0.15);
+}
+
+.profile-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #42a5f5, #2962ff);
+  color: white;
+}
+
+.profile-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f8f8f8;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 4px;
+  transition: color 0.3s ease;
+}
+
+.profile-icon-wrapper:hover .profile-name {
+  color: #42a5f5;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 180px;
+  background: rgba(25, 25, 30, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 8px;
+  margin-top: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  z-index: 1000;
+  animation: dropdown-fade 0.2s ease-in-out;
+}
+
+@keyframes dropdown-fade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.signout-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: #ff4081;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.signout-button:hover {
+  background: rgba(255, 64, 129, 0.1);
+}
+
+.signout-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mobile profile styling */
+.mobile-profile-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 20px;
+  padding-top: 15px;
+}
+
+.mobile-profile-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.mobile-profile-info .profile-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f8f8f8;
+  max-width: none; /* Allow full width in mobile view */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-signout-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 80%;
+  margin: 0 auto;
+  padding: 12px 15px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 64, 129, 0.15);
+  color: #ff4081;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-signout-button:hover {
+  background: rgba(255, 64, 129, 0.25);
+}
+
 /* 📱 Mobile Menu Button */
 .menu-icon {
   display: none;
@@ -191,34 +341,66 @@
   text-shadow: 0 0 10px rgba(255, 64, 129, 0.7);
 }
 
-.logout-link {
-  display: flex;
-  align-items: center;
-  color: #ff0000; /* Change the color to red */
-  font-weight: bold; /* Make the text bold */
-  padding: 10px 15px; /* Add some padding */
-  border-radius: 5px; /* Add rounded corners */
-  transition: background-color 0.3s ease; /* Add a transition effect */
-}
-
-.logout-link:hover {
-  background-color: #ffe6e6; /* Change background color on hover */
-  color: #cc0000; /* Change text color on hover */
-}
-
 /* Media Queries for Responsive Design */
 @media (max-width: 992px) {
-  .nav-links {
-    gap: 20px;
-  }
-}
-
-@media (max-width: 768px) {
   .nav-links {
     display: none;
   }
 
   .menu-icon {
-      display: flex;
+    display: flex;
+    margin-left: auto;
+  }
+
+  /* Hide desktop profile container in mobile view */
+  .profile-container {
+    display: none;
+  }
+
+  /* Mobile profile styling */
+  .mobile-profile-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 20px;
+    padding-top: 15px;
+  }
+
+  .mobile-profile-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+
+  .mobile-profile-info .profile-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f8f8f8;
+    max-width: none; /* Allow full width in mobile view */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-signout-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 80%;
+    margin: 0 auto;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 6px;
+    background: rgba(255, 64, 129, 0.15);
+    color: #ff4081;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-signout-button:hover {
+    background: rgba(255, 64, 129, 0.25);
   }
 }

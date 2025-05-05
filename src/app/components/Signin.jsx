@@ -1,76 +1,123 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Lock } from 'lucide-react';
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import Image from "next/image";
 import '../../styles/signin.css'; // Importing external CSS
 import image from '../../../public/images/cropped-logo.png'; // Importing image
 import { auth } from '../../lib/firebase'; // Import auth from centralized Firebase config
+import { useAuth } from '../../context/AuthContext'; // Import auth context
+import Toast from "./ui/Toast"; // Import Toast component
 
 function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('error');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { setTokenCookie } = useAuth();
   
-  // No need for useEffect to initialize Firebase - we're using the centralized configuration
+  // Get redirect path if available
+  const redirectPath = searchParams.get('redirect');
+  // Get error information from URL if available
+  const urlError = searchParams.get('error');
+  const urlMessage = searchParams.get('message');
+
+  // Set error from URL parameters when component mounts
+  useEffect(() => {
+    if (urlError && urlMessage) {
+      setToastMessage(urlMessage);
+      setToastType('error');
+      setShowToast(true);
+    }
+  }, [urlError, urlMessage]);
+
+  const showError = (message, type = 'error') => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+    setError(message); // Keep the inline error message for accessibility
+  };
 
   const handleSignIn = async (e) => {
     e.preventDefault();
     setError('');
+    setShowToast(false);
     setLoading(true); // Start loading
 
     if (!email || !password) {
-      setError('Email and password are required');
+      showError('Email and password are required');
       setLoading(false);
       return;
     }
 
-    // No need to check if auth is initialized or validate Firebase config
-    // since we're using the centralized Firebase auth service
-
     try {
+      // Sign in with Firebase authentication
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("User signed in successfully:", userCredential.user.uid);
+      
+      // Set authentication token cookie via our AuthContext
+      await setTokenCookie(true); // Force refresh token
+      
+      // Reset form state
       setEmail('');
       setPassword('');
+      
+      // The middleware will automatically handle the redirection
+      // Just navigate to the home page, and the middleware will ensure
+      // the user stays there if authenticated
+      router.push('/home');
       setLoading(false);
-      router.push('/home'); // Redirect to dashboard after successful login
     } catch (err) {
       setLoading(false);
       console.error("Sign-in error:", err);
       // Handle specific Firebase Authentication errors
       switch (err.code) {
         case 'auth/user-not-found':
-          setError('No user found with this email.');
+          showError('No user found with this email.');
           break;
         case 'auth/wrong-password':
-          setError('Incorrect password.');
+        case 'auth/invalid-credential':
+          showError('Incorrect email or password.');
           break;
         case 'auth/invalid-email':
-          setError('Invalid email format.');
+          showError('Invalid email format.');
           break;
         case 'auth/too-many-requests':
-          setError('Too many attempts. Try again later.');
+          showError('Too many attempts. Try again later.');
           break;
         case 'auth/network-request-failed':
-          setError('Network error. Please check your connection.');
+          showError('Network error. Please check your connection.');
           break;
         case 'auth/api-key-not-valid':
-          setError('Invalid Firebase API key. Please check your environment configuration.');
+          showError('Invalid Firebase API key. Please check your environment configuration.');
+          break;
+        case 'auth/user-disabled':
+          showError('This account has been disabled. Please contact support.');
           break;
         default:
-          setError(`Authentication error: ${err.message || 'Unknown error'}`);
+          showError(`Authentication error: ${err.message || 'Unknown error'}`);
       }
     }
   };
 
   return (
     <div className="signin-container">
+      {/* Toast notification for errors */}
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        show={showToast}
+        onClose={() => setShowToast(false)}
+      />
+      
       {/* Animated background particles */}
       <div className="particle"></div>
       <div className="particle"></div>
